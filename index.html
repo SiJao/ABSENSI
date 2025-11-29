@@ -5,163 +5,344 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIAKAD - Daarul 'Uluum Lido</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind config untuk mengaktifkan dark mode via class
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
-        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
-        .pesantren-font { font-family: 'Amiri', serif; }
-        .bg-pesantren { background-color: #006838; }
-        .text-pesantren { color: #006838; }
-        .sidebar { transition: transform 0.3s ease-in-out; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #006838; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
-        .db-spinner { width: 30px; height: 30px; border: 4px solid #e5e7eb; border-top: 4px solid #16a34a; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Custom Theming */
+        :root { 
+            --primary-color: #166534; 
+            --bg-light: #f8fafc;
+        }
         
-        .status-radio:checked + label { font-weight: bold; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transform: scale(1.05); }
-        .status-radio[value="Sakit"]:checked + label { background-color: #eab308; border-color: #eab308; }
-        .status-radio[value="Izin"]:checked + label { background-color: #3b82f6; border-color: #3b82f6; }
-        .status-radio[value="Alpha"]:checked + label { background-color: #dc2626; border-color: #dc2626; }
-        .modal { transition: opacity 0.25s ease; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); transition: background-color 0.3s, color 0.3s; }
+        .font-pesantren { font-family: 'Amiri', serif; }
+        
+        /* Smooth Transitions */
+        .sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Radio Button Styles */
+        .status-card input:checked + div {
+            border-color: currentColor;
+            background-color: currentColor;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        .status-card div { transition: all 0.2s ease; }
+        
+        /* Dark Mode Overrides */
+        html.dark body { background-color: #0f172a; color: #e2e8f0; }
+        
+        /* Loader */
+        .loader-dots div { animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
     </style>
+    <!-- Script untuk mencegah flash putih saat load -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 </head>
-<body class="bg-gray-100 h-screen overflow-hidden flex">
+<body class="h-screen overflow-hidden flex text-gray-800 antialiased dark:text-gray-100">
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar bg-white w-64 h-full shadow-xl fixed md:relative z-30 transform -translate-x-full md:translate-x-0 flex flex-col">
-        <div class="p-6 border-b flex flex-col items-center text-center">
-            <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" alt="Logo DU" class="h-16 mb-3">
-            <h1 class="font-bold text-gray-800 leading-tight">Daarul 'Uluum<br>Lido</h1>
-            <p class="text-xs text-gray-500 mt-1">Sistem Absensi Terpadu</p>
+    <aside id="sidebar" class="sidebar bg-white dark:bg-gray-900 w-72 h-full shadow-xl fixed md:relative z-30 transform -translate-x-full md:translate-x-0 flex flex-col border-r border-gray-100 dark:border-gray-700">
+        <!-- Brand -->
+        <div class="h-20 flex items-center justify-center border-b border-gray-100 dark:border-gray-700 px-6">
+            <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" alt="Logo" class="h-10 w-10 mr-3 object-contain">
+            <div class="text-left">
+                <h1 class="font-bold text-lg leading-tight text-green-800 dark:text-green-400">Daarul 'Uluum</h1>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 tracking-wider uppercase font-semibold">SIAKAD Lido</p>
+            </div>
         </div>
-        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Menu Utama</p>
-            <button onclick="showPage('input')" id="navInput" class="w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg bg-green-50 text-green-700 transition-colors">
-                <i class="fas fa-edit w-6 text-center mr-2 text-lg"></i> Input Absensi
+
+        <!-- Menu -->
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+            <p class="px-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Menu Utama</p>
+            
+            <button onclick="showPage('input')" id="navInput" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all hover:shadow-sm group hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300">
+                <span class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center mr-3 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-edit"></i>
+                </span>
+                Input Absensi
             </button>
-            <button onclick="showPage('rekap')" id="navRekap" class="w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-                <i class="fas fa-chart-area w-6 text-center mr-2 text-lg"></i> Rekapitulasi
+            
+            <button onclick="showPage('rekap')" id="navRekap" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all hover:shadow-sm group">
+                <span class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center mr-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-chart-pie"></i>
+                </span>
+                Rekapitulasi
+            </button>
+            
+            <button onclick="showPage('portal')" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all hover:shadow-sm group">
+                <span class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center mr-3 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-search"></i>
+                </span>
+                Riwayat Santri
             </button>
         </nav>
-        
-        <!-- USER PROFILE SECTION -->
-        <div class="p-4 border-t bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onclick="openProfileModal()">
+
+        <!-- User Profile (Footer) -->
+        <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onclick="openProfileModal()">
             <div class="flex items-center">
-                <div id="sidebarAvatar" class="bg-pesantren text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold mr-3 overflow-hidden border-2 border-green-700 bg-cover bg-center shadow-sm">
+                <div id="sidebarAvatar" class="h-10 w-10 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-white font-bold shadow-md border-2 border-white dark:border-gray-600 bg-cover bg-center">
                     <i class="fas fa-user"></i>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p id="sidebarUsername" class="text-sm font-medium text-gray-900 truncate">User</p>
-                    <p id="sidebarRole" class="text-xs text-gray-500 truncate">Role</p>
+                <div class="ml-3 flex-1 min-w-0">
+                    <p id="sidebarUsername" class="text-sm font-bold text-gray-900 dark:text-white truncate">User</p>
+                    <p id="sidebarRole" class="text-xs text-green-600 dark:text-green-400 truncate font-medium">Role</p>
                 </div>
-                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                <i class="fas fa-chevron-up text-gray-400 text-xs"></i>
             </div>
         </div>
     </aside>
 
-    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
+    <!-- OVERLAY -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-gray-900/50 z-20 hidden backdrop-blur-sm transition-opacity md:hidden"></div>
 
     <!-- MAIN CONTENT -->
-    <div class="flex-1 flex flex-col h-full relative w-full">
-        <header class="bg-white shadow-sm z-10 flex items-center justify-between px-4 py-3">
-            <div class="flex items-center">
-                <button onclick="toggleSidebar()" class="text-gray-500 focus:outline-none md:hidden mr-3"><i class="fas fa-bars text-xl"></i></button>
-                <span class="font-bold text-pesantren">SIAKAD</span>
+    <div class="flex-1 flex flex-col h-full relative w-full bg-[#f8fafc] dark:bg-[#0f172a]">
+        
+        <!-- HEADER -->
+        <header class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-gray-700 px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 dark:text-gray-400 hover:text-green-700 transition-colors">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 id="pageTitle" class="text-lg font-bold text-gray-800 dark:text-white hidden sm:block">Dashboard</h2>
             </div>
-            <div class="text-right">
-                <div id="clock" class="font-mono text-sm font-bold text-gray-700">00:00:00 WIB</div>
-                <div id="date" class="text-xs text-gray-500">...</div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleDarkMode()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-yellow-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon" id="darkModeIcon"></i>
+                </button>
+                
+                <!-- Clock -->
+                <div class="text-right hidden sm:block">
+                    <div id="clock" class="font-mono text-sm font-bold text-gray-700 dark:text-gray-300 leading-none">00:00:00</div>
+                    <div id="date" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide font-medium mt-1">...</div>
+                </div>
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-4 md:p-8">
+        <!-- CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
             
             <!-- LOGIN PAGE -->
-            <div id="loginSection" class="fixed inset-0 z-50 bg-gray-100 flex items-center justify-center p-4">
-                <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm border-t-4 border-green-700">
-                    <div class="text-center mb-6">
-                        <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" alt="Logo DU" class="h-16 mx-auto mb-4">
-                        <h2 class="text-xl font-bold text-gray-800">Login Petugas</h2>
+            <div id="loginSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-black">
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-white/20 backdrop-blur-lg">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-green-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                            <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" class="w-12 h-12 object-contain">
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Selamat Datang</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Silakan login untuk melanjutkan</p>
                     </div>
-                    <form id="loginForm" onsubmit="handleLogin(event)">
-                        <div class="mb-4">
-                            <label class="block text-xs text-gray-500 font-bold mb-1">Username</label>
-                            <input type="text" id="username" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="Username" required>
+
+                    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Username</label>
+                            <input type="text" id="username" class="w-full px-5 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white" placeholder="Masukkan username" required>
                         </div>
-                        <div class="mb-6">
-                            <label class="block text-xs text-gray-500 font-bold mb-1">Password</label>
-                            <input type="password" id="password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="Password" required>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Password</label>
+                            <input type="password" id="password" class="w-full px-5 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white" placeholder="••••••••" required>
                         </div>
-                        <button type="submit" class="w-full bg-pesantren text-white font-bold py-3 rounded-lg hover:bg-green-800 transition shadow-lg flex justify-center items-center gap-2">
-                            <span>Masuk</span>
-                            <div id="loginLoader" class="loader hidden border-white border-t-transparent"></div>
+                        
+                        <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-200 dark:shadow-none transform active:scale-95 transition-all duration-200 flex justify-center items-center">
+                            <span>Masuk Aplikasi</span>
+                            <!-- Simple Spinner -->
+                            <div id="loginLoader" class="hidden ml-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                         </button>
                     </form>
-                    <div class="mt-4 text-center">
-                        <button onclick="openModal('signupModal')" class="text-xs text-green-600 hover:underline font-bold">Daftar Akun Baru</button>
+
+                    <div class="mt-6 flex justify-between text-sm font-medium">
+                        <button onclick="openModal('signupModal')" class="text-gray-500 hover:text-green-600 dark:hover:text-green-400 transition-colors">Buat Akun?</button>
+                        <button onclick="openPublicPortal()" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors">Cek Portal Wali</button>
                     </div>
-                    <p id="loginError" class="text-red-500 text-xs mt-3 text-center hidden font-bold"></p>
-                    <p id="defaultUserHint" class="text-gray-400 text-[10px] text-center mt-4 hidden">Mode Offline/Admin Darurat Aktif</p>
+
+                    <div id="loginError" class="mt-4 hidden p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded-lg text-center border border-red-100 dark:border-red-800 font-medium animate-pulse"></div>
+                    <div id="defaultUserHint" class="mt-2 text-center hidden text-[10px] text-gray-400">Database Mode: Offline/CSV</div>
+                </div>
+            </div>
+
+            <!-- PUBLIC PORTAL -->
+            <div id="publicPortal" class="fixed inset-0 z-40 bg-white dark:bg-gray-900 overflow-y-auto hidden fade-in">
+                <div class="max-w-md mx-auto min-h-screen flex flex-col justify-center p-6">
+                    <div class="text-center mb-8">
+                        <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" class="h-20 mx-auto mb-4">
+                        <h2 class="text-3xl font-bold text-green-800 dark:text-green-400">Portal Wali Santri</h2>
+                        <p class="text-gray-500 dark:text-gray-400">Pantau kehadiran putra/putri Anda secara real-time</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-6 border border-gray-100 dark:border-gray-700">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">ID Santri / NIS</label>
+                        <div class="flex gap-2 mb-6">
+                            <input type="text" id="publicSearchId" class="flex-1 px-5 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-green-500 outline-none font-mono text-lg dark:text-white" placeholder="Contoh: 12345">
+                            <button onclick="searchStudentHistory('public')" class="bg-green-600 text-white px-6 rounded-xl hover:bg-green-700 shadow-lg shadow-green-100 dark:shadow-none transition-all"><i class="fas fa-search"></i></button>
+                        </div>
+
+                        <div id="publicResult" class="hidden space-y-4">
+                            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-2xl border border-green-100 dark:border-green-800">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p class="text-xs text-green-600 dark:text-green-400 font-bold uppercase">Data Santri</p>
+                                        <h4 id="publicName" class="font-bold text-gray-800 dark:text-white text-lg leading-tight">Nama Santri</h4>
+                                    </div>
+                                    <div class="h-10 w-10 bg-white dark:bg-green-800 rounded-full flex items-center justify-center text-green-600 dark:text-green-200 shadow-sm"><i class="fas fa-user-graduate"></i></div>
+                                </div>
+                                <!-- Detail Tambahan -->
+                                <div class="grid grid-cols-2 gap-2 text-xs border-t border-green-200 dark:border-green-800 pt-2">
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400 block">Kelas</span>
+                                        <span id="publicClass" class="font-semibold text-gray-700 dark:text-gray-200">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400 block">Kamar</span>
+                                        <span id="publicRoom" class="font-semibold text-gray-700 dark:text-gray-200">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="max-h-64 overflow-y-auto rounded-2xl border border-gray-100 dark:border-gray-700">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 sticky top-0">
+                                        <tr><th class="p-3 font-semibold">Tanggal</th><th class="p-3 font-semibold">Ket</th><th class="p-3 font-semibold text-center">Status</th></tr>
+                                    </thead>
+                                    <tbody id="publicHistoryBody" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="closePublicPortal()" class="mt-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Login
+                    </button>
                 </div>
             </div>
 
             <!-- INPUT PAGE -->
-            <div id="pageInput" class="max-w-5xl mx-auto hidden">
-                <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
-                    <div class="bg-gradient-to-r from-green-700 to-green-600 px-6 py-4 flex justify-between items-center text-white">
-                        <h2 class="font-bold text-lg"><i class="fas fa-edit mr-2"></i> Input Absensi</h2>
-                        <span id="activeCategoryBadge" class="bg-white text-green-700 text-xs font-bold px-2 py-1 rounded">Pilih Menu</span>
+            <div id="pageInput" class="max-w-6xl mx-auto hidden fade-in">
+                <!-- Header Card -->
+                <div class="bg-gradient-to-r from-green-700 to-green-600 rounded-3xl p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 h-full w-1/2 bg-white/5 transform skew-x-12 translate-x-20"></div>
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-bold mb-2">Input Absensi</h2>
+                        <p class="text-green-100 opacity-90">Silakan pilih kategori absensi di bawah ini untuk memulai pencatatan.</p>
                     </div>
-                    <div class="p-4 border-b bg-gray-50">
-                        <div id="categoryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs text-center"></div>
+                </div>
+
+                <!-- Menu Grid -->
+                <div id="categoryGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                    <!-- Generated by JS -->
+                </div>
+
+                <!-- Form Container -->
+                <div id="formContainer" class="hidden bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
+                        <h3 class="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-green-500 rounded-full"></span>
+                            Formulir
+                        </h3>
+                        <span id="activeCategoryBadge" class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">Kategori</span>
                     </div>
-                    <div id="formContainer" class="p-6 hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2" id="groupLabel">Grup</label>
-                                <select id="groupSelect" onchange="loadGroupStudents()" class="w-full px-3 py-2 border rounded-lg bg-white"><option value="">-- Pilih --</option></select>
+
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300" id="groupLabel">Pilih Grup</label>
+                                <div class="relative">
+                                    <select id="groupSelect" onchange="loadGroupStudents()" class="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 appearance-none outline-none transition-all cursor-pointer dark:text-white">
+                                        <option value="">-- Pilih --</option>
+                                    </select>
+                                    <div class="absolute right-3 top-3.5 text-gray-400 pointer-events-none"><i class="fas fa-chevron-down"></i></div>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Agenda</label>
-                                <input type="text" id="agendaInput" class="w-full px-3 py-2 border rounded-lg" placeholder="Contoh: Materi Fiqih">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">Agenda / Keterangan</label>
+                                <input type="text" id="agendaInput" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all dark:text-white" placeholder="Contoh: Materi Fiqih / Senam Pagi">
                             </div>
                         </div>
                         <input type="hidden" id="absensiType">
+
+                        <!-- Table List -->
                         <div id="studentListContainer" class="hidden">
-                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg mb-4 text-xs text-blue-800"><i class="fas fa-info-circle mr-1"></i> <b>Petunjuk:</b> Default <b>Hadir</b>. Klik S/I/A jika tidak hadir.</div>
-                            <div class="table-container border rounded-lg max-h-[500px] overflow-y-auto">
+                            <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 p-4 rounded-xl mb-6 flex items-start gap-3">
+                                <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mt-0.5"></i>
+                                <div class="text-sm text-blue-800 dark:text-blue-200">
+                                    <p class="font-bold mb-1">Petunjuk Pengisian:</p>
+                                    <ul class="list-disc list-inside opacity-90 space-y-1">
+                                        <li>Secara <i>default</i> semua santri dianggap <b>Hadir</b>.</li>
+                                        <li>Klik tombol <b>S</b>, <b>I</b>, atau <b>A</b> hanya untuk santri yang berhalangan.</li>
+                                        <li>Klik ikon <i class="fas fa-times-circle"></i> untuk membatalkan pilihan (kembali Hadir).</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="table-container border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
                                 <table class="w-full">
-                                    <thead class="sticky top-0 z-10 bg-gray-100">
-                                        <tr><th class="w-10 text-center">No</th><th>Nama Santri</th><th class="text-center w-40">Keterangan</th></tr>
+                                    <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs uppercase font-bold">
+                                        <tr>
+                                            <th class="py-4 px-4 w-16 text-center">No</th>
+                                            <th class="py-4 px-4 text-left">Nama Santri</th>
+                                            <th class="py-4 px-4 text-center w-64">Status Kehadiran</th>
+                                        </tr>
                                     </thead>
-                                    <tbody id="studentTableBody"></tbody>
+                                    <tbody id="studentTableBody" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800"></tbody>
                                 </table>
                             </div>
-                            <button onclick="submitBulkAttendance()" id="btnKirim" class="mt-6 w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-800 transition shadow-lg">Kirim Data</button>
+
+                            <div class="mt-6 flex justify-end">
+                                <button onclick="submitBulkAttendance()" id="btnKirim" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-green-200 dark:shadow-none transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Kirim Data Absensi</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div id="selectPrompt" class="p-10 text-center text-gray-400"><i class="fas fa-hand-pointer text-3xl mb-2"></i><p>Pilih menu di atas.</p></div>
                 </div>
             </div>
 
             <!-- REKAP PAGE -->
-            <div id="pageRekap" class="max-w-6xl mx-auto hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard Rekapitulasi</h2>
-                
-                <!-- Chart -->
-                <div class="bg-white p-4 rounded-xl shadow-md mb-6">
-                    <h3 class="text-sm font-bold text-gray-600 mb-4 border-l-4 border-green-600 pl-2">Grafik Mingguan (Absensi Harian)</h3>
-                    <div class="h-64 w-full relative"><canvas id="attendanceChart"></canvas></div>
-                </div>
-
-                <!-- Top Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="topStatsContainer"></div>
-
-                <!-- Table -->
-                <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                    <div class="p-4 border-b flex flex-col sm:flex-row justify-between items-center gap-3 bg-gray-50">
-                        <h3 class="font-bold text-gray-700"><i class="fas fa-table mr-2"></i>Data Detail</h3>
-                        <select id="rekapSourceSelect" onchange="loadRecapData(1)" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+            <div id="pageRekap" class="max-w-7xl mx-auto hidden fade-in">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard Rekapitulasi</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Analisis kehadiran santri minggu ini</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700 flex shadow-sm">
+                        <!-- Custom Tab-like selector -->
+                        <select id="rekapSourceSelect" onchange="loadRecapData(1)" class="bg-transparent border-none text-sm font-medium focus:ring-0 text-gray-700 dark:text-gray-200 py-1 px-3 cursor-pointer">
                             <option value="harian">Absensi Harian</option>
                             <option value="muhadhoroh">Muhadhoroh</option>
                             <option value="halaqoh">Halaqoh Qur'an</option>
@@ -170,111 +351,196 @@
                             <option value="kesenian">Kesenian</option>
                         </select>
                     </div>
-                    <div class="table-container relative min-h-[200px]">
-                        <div id="rekapLoader" class="absolute inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center z-10 hidden"><div class="loader border-gray-300 border-t-green-600 mb-2"></div><span class="text-xs text-gray-500">Memuat data...</span></div>
-                        <table class="w-full text-left">
-                            <thead><tr><th class="w-12">No</th><th>Waktu</th><th>Nama</th><th>Agenda</th><th>Status</th><th>Pelapor</th></tr></thead>
-                            <tbody id="rekapTableBody"></tbody>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Chart Card -->
+                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-gray-700 dark:text-gray-200">Tren Kehadiran (Mingguan)</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Live Data</span>
+                        </div>
+                        <div class="h-72 w-full relative">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Stats Column -->
+                    <div class="space-y-4" id="topStatsContainer">
+                        <!-- JS will inject cards here -->
+                        <div class="animate-pulse bg-gray-200 dark:bg-gray-700 h-24 rounded-xl"></div>
+                        <div class="animate-pulse bg-gray-200 dark:bg-gray-700 h-24 rounded-xl"></div>
+                        <div class="animate-pulse bg-gray-200 dark:bg-gray-700 h-24 rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Table Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+                        <h3 class="font-bold text-gray-700 dark:text-gray-200">Log Aktivitas Terakhir</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <div id="rekapLoader" class="hidden p-10 text-center text-gray-500">
+                            <div class="loader mx-auto mb-2"></div> Memuat data...
+                        </div>
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 uppercase font-bold text-xs">
+                                <tr>
+                                    <th class="px-6 py-4 w-16">No</th>
+                                    <th class="px-6 py-4">Waktu</th>
+                                    <th class="px-6 py-4">Nama Santri</th>
+                                    <th class="px-6 py-4">Keterangan</th>
+                                    <th class="px-6 py-4 text-center">Status</th>
+                                    <th class="px-6 py-4">Pelapor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rekapTableBody" class="divide-y divide-gray-100 dark:divide-gray-700 dark:text-gray-300"></tbody>
                         </table>
                     </div>
                     <!-- Pagination -->
-                    <div class="p-4 bg-gray-50 border-t flex justify-between items-center">
-                        <button onclick="changePage(-1)" id="btnPrev" class="px-3 py-1 bg-white border rounded text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50">Prev</button>
-                        <span id="pageInfo" class="text-xs font-bold text-gray-500">Page 1</span>
-                        <button onclick="changePage(1)" id="btnNext" class="px-3 py-1 bg-white border rounded text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50">Next</button>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <button onclick="changePage(-1)" id="btnPrev" class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:text-white">Sebelumnya</button>
+                        <span id="pageInfo" class="text-xs font-bold text-gray-500 dark:text-gray-400">Halaman 1</span>
+                        <button onclick="changePage(1)" id="btnNext" class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:text-white">Selanjutnya</button>
                     </div>
                 </div>
             </div>
+
+            <!-- INTERNAL SEARCH PAGE -->
+            <div id="pagePortal" class="max-w-4xl mx-auto hidden fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Pencarian Riwayat Santri</h2>
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-md border border-gray-100 dark:border-gray-700">
+                    <div class="flex gap-3 mb-8">
+                        <input type="text" id="internalSearchId" class="flex-1 px-5 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-green-500 outline-none transition-all dark:text-white" placeholder="Masukkan ID Santri / NIS...">
+                        <button onclick="searchStudentHistory('internal')" class="bg-green-600 text-white px-8 py-3 rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-100 dark:shadow-none transition-all"><i class="fas fa-search mr-2"></i> Cari</button>
+                    </div>
+                    
+                    <div id="internalResult" class="hidden">
+                        <div class="bg-green-50 dark:bg-green-900/30 p-5 rounded-2xl border border-green-100 dark:border-green-800 flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-xs text-green-600 dark:text-green-400 font-bold uppercase">Data Santri</p>
+                                <h4 id="internalName" class="font-bold text-2xl text-gray-800 dark:text-white mt-1">Nama Santri</h4>
+                                <div class="mt-2 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
+                                    <span><i class="fas fa-users mr-1 opacity-70"></i> <b id="internalClass">-</b></span>
+                                    <span><i class="fas fa-door-open mr-1 opacity-70"></i> <b id="internalRoom">-</b></span>
+                                </div>
+                            </div>
+                            <div class="h-14 w-14 bg-white dark:bg-green-800 rounded-full flex items-center justify-center text-green-600 dark:text-green-200 shadow-sm text-2xl"><i class="fas fa-user-graduate"></i></div>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 uppercase font-bold text-xs">
+                                    <tr><th class="p-4">Tanggal</th><th class="p-4">Kegiatan</th><th class="p-4">Keterangan</th><th class="p-4 text-center">Status</th></tr>
+                                </thead>
+                                <tbody id="internalHistoryBody" class="divide-y divide-gray-100 dark:divide-gray-700 dark:text-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <!-- MODALS (Profile, Logout, Signup, Password) -->
-    <div id="profileModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
-        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeModal('profileModal')"></div>
-        <div class="bg-white rounded-xl shadow-2xl p-0 max-w-sm w-full mx-4 relative z-10 overflow-hidden transform transition-all">
-            <div class="bg-green-700 h-24 relative"><button onclick="closeModal('profileModal')" class="absolute top-2 right-2 text-white hover:text-gray-200"><i class="fas fa-times text-lg"></i></button></div>
-            <div class="px-6 pb-6 text-center">
-                <div class="relative -mt-12 mb-4 flex justify-center">
-                    <div id="modalAvatar" class="w-24 h-24 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center text-4xl text-gray-500 shadow-md bg-cover bg-center"><i class="fas fa-user"></i></div>
-                </div>
-                <h3 id="modalUsername" class="text-xl font-bold text-gray-800">User Name</h3>
-                <p id="modalRole" class="text-sm text-green-600 font-semibold uppercase tracking-wide mb-6">Role</p>
-                <div class="border-t pt-4 text-left">
-                    <button onclick="document.getElementById('changePassForm').classList.toggle('hidden')" class="flex justify-between items-center w-full text-sm font-medium text-gray-700 hover:text-green-700 mb-2"><span><i class="fas fa-key mr-2"></i> Ganti Password</span><i class="fas fa-chevron-down"></i></button>
-                    <div id="changePassForm" class="hidden bg-gray-50 p-3 rounded-lg mb-4">
-                        <input type="password" id="cpOld" class="w-full mb-2 px-3 py-2 text-sm border rounded" placeholder="Password Lama">
-                        <input type="password" id="cpNew" class="w-full mb-2 px-3 py-2 text-sm border rounded" placeholder="Password Baru">
-                        <button onclick="doChangePassword()" id="btnCP" class="w-full bg-blue-600 text-white py-1.5 rounded text-sm hover:bg-blue-700">Simpan Password</button>
+    <!-- MODALS -->
+    <!-- Status Modal -->
+    <div id="statusModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeModal('statusModal')"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full relative z-10 text-center transform transition-all scale-100">
+            <div id="modalIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-5 bg-green-100 text-green-600"></div>
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-900 dark:text-white mb-2"></h3>
+            <p id="modalMessage" class="text-sm text-gray-500 dark:text-gray-300 mb-6"></p>
+            <button onclick="closeModal('statusModal')" class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white font-bold py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('profileModal')"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden">
+            <div class="bg-gradient-to-r from-green-600 to-green-800 h-28 relative">
+                <button onclick="closeModal('profileModal')" class="absolute top-4 right-4 text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="px-6 pb-8 text-center relative">
+                <div class="relative -mt-12 mb-4 inline-block">
+                    <div id="modalAvatar" class="w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 bg-gray-200 flex items-center justify-center text-4xl text-gray-400 shadow-lg bg-cover bg-center">
+                        <i class="fas fa-user"></i>
                     </div>
                 </div>
-                <button onclick="confirmLogout()" class="w-full mt-2 bg-red-50 text-red-600 border border-red-200 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors"><i class="fas fa-sign-out-alt mr-2"></i> Keluar (Logout)</button>
+                <h3 id="modalUsername" class="text-2xl font-bold text-gray-800 dark:text-white mb-1">User</h3>
+                <span id="modalRole" class="inline-block bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide mb-6">Role</span>
+                
+                <div class="space-y-3">
+                    <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <button onclick="document.getElementById('changePassForm').classList.toggle('hidden')" class="flex justify-between items-center w-full p-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                            <div class="flex items-center gap-3"><i class="fas fa-key text-gray-400"></i> Ganti Password</div>
+                            <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+                        </button>
+                        <div id="changePassForm" class="hidden mt-2 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl space-y-2">
+                            <input type="password" id="cpOld" class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Password Lama">
+                            <input type="password" id="cpNew" class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Password Baru">
+                            <button onclick="doChangePassword()" id="btnCP" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-blue-700 mt-2">Simpan Password</button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="confirmLogout()" class="w-full flex items-center justify-center gap-2 p-3 text-red-600 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">
+                        <i class="fas fa-sign-out-alt"></i> Keluar Akun
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="logoutConfirmModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
-        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeModal('logoutConfirmModal')"></div>
-        <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4 relative z-10 text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-red-100"><i class="fas fa-exclamation-triangle text-2xl text-red-600"></i></div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">Konfirmasi Keluar</h3>
-            <p class="text-sm text-gray-500 mb-6">Yakin ingin keluar?</p>
-            <div class="flex space-x-3"><button onclick="closeModal('logoutConfirmModal')" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg">Batal</button><button onclick="performLogout()" class="flex-1 bg-red-600 text-white py-2 rounded-lg">Ya, Keluar</button></div>
-        </div>
-    </div>
+    <!-- Signup & Logout Confirm Modals (Styling enhanced) -->
+    <div id="logoutConfirmModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div><div class="bg-white dark:bg-gray-800 p-6 rounded-2xl relative z-10 max-w-xs w-full text-center shadow-2xl"><div class="mx-auto h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mb-4 text-red-600 text-xl"><i class="fas fa-power-off"></i></div><h3 class="font-bold text-lg dark:text-white mb-2">Konfirmasi</h3><p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Yakin ingin mengakhiri sesi?</p><div class="flex gap-3"><button onclick="closeModal('logoutConfirmModal')" class="flex-1 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Batal</button><button onclick="performLogout()" class="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold hover:bg-red-700">Keluar</button></div></div></div>
 
-    <div id="statusModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
-        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeModal('statusModal')"></div>
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 relative z-10 text-center">
-            <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4"></div>
-            <h3 id="modalTitle" class="text-lg font-bold"></h3>
-            <p id="modalMessage" class="text-sm text-gray-500 mt-2"></p>
-            <button onclick="closeModal('statusModal')" class="mt-5 w-full bg-gray-200 text-gray-800 py-2 rounded">Tutup</button>
-        </div>
-    </div>
+    <div id="signupModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('signupModal')"></div><div class="bg-white dark:bg-gray-800 p-8 rounded-3xl relative z-10 max-w-sm w-full shadow-2xl"><h3 class="font-bold text-2xl text-gray-800 dark:text-white mb-6 text-center">Registrasi User</h3><div class="space-y-4"><input id="newUsername" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:text-white" placeholder="Username Baru"><input id="newPassword" type="password" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:text-white" placeholder="Password"><div class="space-y-1"><label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">Divisi / Role</label><select id="newRole" class="w-full px-4 py-3 border rounded-xl bg-white dark:bg-gray-700 dark:text-white"><option value="keamanan">Keamanan</option><option value="bahasa">Bahasa</option><option value="peribadatan">Peribadatan</option><option value="kordinator">Kordinator</option><option value="olahraga">Olahraga</option><option value="kesenian">Kesenian</option></select></div></div><button onclick="doSignup()" id="btnSignup" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-xl mt-6 hover:bg-green-700 shadow-lg transition-all">Daftar Sekarang</button><button onclick="closeModal('signupModal')" class="w-full text-gray-400 text-sm mt-4 hover:text-gray-600 dark:hover:text-gray-300">Batalkan</button></div></div>
 
-    <div id="signupModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
-        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeModal('signupModal')"></div>
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 relative z-10">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Daftar Akun Baru</h3>
-            <input type="text" id="newUsername" class="w-full mb-3 px-3 py-2 border rounded" placeholder="Username Baru">
-            <input type="password" id="newPassword" class="w-full mb-3 px-3 py-2 border rounded" placeholder="Password">
-            <label class="block text-xs font-bold text-gray-500 mb-1">Pilih Divisi:</label>
-            <select id="newRole" class="w-full mb-4 px-3 py-2 border rounded bg-white">
-                <option value="keamanan">Keamanan</option>
-                <option value="bahasa">Bahasa</option>
-                <option value="peribadatan">Peribadatan</option>
-                <option value="kordinator">Kordinator</option>
-                <option value="olahraga">Olahraga</option>
-                <option value="kesenian">Kesenian</option>
-            </select>
-            <button onclick="doSignup()" id="btnSignup" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 mb-2">Daftar</button>
-            <button onclick="closeModal('signupModal')" class="w-full text-gray-500 text-sm">Batal</button>
-        </div>
-    </div>
-
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // CONFIG
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyz-ZXrAxTfYpY1YuJtk5D5h-fkEGu3tfvQktVeFHJ4_xomMbokg3xZaHQHYeZtNjH2/exec"; 
-        // LINK CSV USER (Untuk Read Data Cepat)
+        // CONFIGURATION
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxp8wpJ74Mz3mc0g3i4MJtX1tMjIGhlXksUJ71_FRFmNJ-4SLbXDpWJrCBlm6L_TTQ/exec"; 
         const URL_USER_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAIpCKM-FLkgVPuNA9kEQWlUd_JTi-M1_43FC4mdV65-u83LWPMYkrtwtWBpDGB5Tds3ew9Yeq0H_W/pub?output=csv";
         
-        // STATE
-        let usersData = [], studentsDataRaw = [], currentUser = null;
+        // APP STATE
+        let usersData = [], studentsDataRaw = [], currentUser = null, chartInstance = null;
         let listKamar = new Set(), listKelas = new Set();
         let fullRecapData = [], currentPage = 1, rowsPerPage = 20;
         let dataReady = false, loadPromise = null;
 
+        // --- INITIALIZATION ---
+        
+        // 1. Clock Logic
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID', {timeZone: 'Asia/Jakarta'}) + ' WIB';
             document.getElementById('date').innerText = now.toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
         }, 1000);
 
-        window.onload = () => { loadPromise = initData(); };
+        // 2. Startup Logic
+        window.onload = async () => {
+            // Theme Check
+            if(localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('darkModeIcon').classList.replace('fa-moon', 'fa-sun');
+            }
+            
+            // Session Check
+            const sess = localStorage.getItem('siakad_user');
+            if(sess) {
+                currentUser = JSON.parse(sess);
+                updateUIForUser(); // Direct Dashboard Access
+            }
+            
+            // Data Loading
+            loadPromise = initData();
+        };
 
+        // 3. Data Fetching
         async function initData() {
             try {
-                // 1. Fetch Students
+                // Fetch Students
                 const sRes = await fetch(SCRIPT_URL + '?action=getStudents');
                 const sJson = await sRes.json();
                 if(sJson.result === 'success') {
@@ -283,33 +549,477 @@
                     dataReady = true;
                 }
 
-                // 2. Fetch Users from CSV (Faster & Reliable Reading)
-                const uRes = await fetch(URL_USER_CSV);
-                const uText = await uRes.text();
-                usersData = parseCSVUser(uText);
-                
-                // 3. Load Stats (Harian)
-                loadDashboardStats();
+                // Fetch Users (Try GAS first, Fallback CSV)
+                let loadedUsers = false;
+                try {
+                    const uRes = await fetch(SCRIPT_URL + '?action=getUsers');
+                    const uJson = await uRes.json();
+                    if(uJson.result === 'success' && uJson.data.length > 0) {
+                        usersData = uJson.data;
+                        loadedUsers = true;
+                    }
+                } catch(e) { console.log("GAS Users unreachable, using CSV..."); }
 
-            } catch(e) { console.error("Init Error:", e); }
+                if(!loadedUsers) {
+                    const csvRes = await fetch(URL_USER_CSV);
+                    const csvText = await csvRes.text();
+                    usersData = parseCSVUser(csvText);
+                    document.getElementById('defaultUserHint').classList.remove('hidden');
+                }
+                
+                // If Logged In, Load Stats
+                if(currentUser) loadDashboardStats();
+
+            } catch(e) { console.error("Initialization Failed", e); }
         }
 
+        // --- HELPERS ---
         function parseCSVUser(text) {
             const lines = text.trim().split('\n');
             const res = [];
+            // Skip header index 0
             for(let i=1; i<lines.length; i++) {
-                // Parse CSV simple: A=User, B=Pass, C=Role, D=PhotoURL
                 const r = lines[i].split(',').map(c => c.trim().replace(/"/g,''));
                 if(r.length >= 3) {
-                    res.push({
-                        username: r[0], 
-                        password: r[1], 
-                        role: r[2], 
-                        photo: r[3] || ""
-                    });
+                    res.push({ username: r[0], password: r[1], role: r[2], photo: r[3] || "" });
                 }
             }
             return res;
+        }
+
+        function processGroups() {
+            studentsDataRaw.forEach(row => {
+                if(row[3]) listKelas.add(row[3]);
+                if(row[4]) listKamar.add(row[4]);
+            });
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // --- AUTHENTICATION ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const uInput = document.getElementById('username').value.trim();
+            const pInput = document.getElementById('password').value.trim();
+            const loader = document.getElementById('loginLoader');
+            const err = document.getElementById('loginError');
+
+            loader.classList.remove('hidden');
+            err.classList.add('hidden');
+
+            // Ensure data is loaded
+            if(!dataReady && usersData.length === 0) await loadPromise;
+
+            setTimeout(() => {
+                const user = usersData.find(x => String(x.username).toLowerCase() === uInput.toLowerCase() && String(x.password) === pInput);
+                // Fallback for initial setup
+                const isEmergency = (usersData.length===0 && uInput==='admin' && pInput==='admin');
+
+                if(user || isEmergency) {
+                    currentUser = user ? user : {username:'Admin', role:'admin', photo:''};
+                    localStorage.setItem('siakad_user', JSON.stringify(currentUser));
+                    updateUIForUser();
+                } else {
+                    err.innerText = "Username atau Password Salah!";
+                    err.classList.remove('hidden');
+                }
+                loader.classList.add('hidden');
+            }, 800); // Simulate network delay for smoother UX
+        }
+
+        function updateUIForUser() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('pageInput').classList.remove('hidden');
+            document.getElementById('pageTitle').innerText = "Dashboard";
+            
+            // Update Sidebar Info
+            document.getElementById('sidebarUsername').innerText = currentUser.username;
+            document.getElementById('sidebarRole').innerText = currentUser.role;
+            const av = document.getElementById('sidebarAvatar');
+            if(currentUser.photo && currentUser.photo.startsWith('http')) {
+                av.innerHTML = ''; av.style.backgroundImage = `url('${currentUser.photo}')`;
+            } else {
+                av.innerHTML = '<i class="fas fa-user"></i>'; av.style.backgroundImage = 'none';
+            }
+
+            generateMenu(currentUser.role);
+            loadDashboardStats();
+        }
+
+        function logout() { confirmLogout(); }
+        function performLogout() { localStorage.removeItem('siakad_user'); location.reload(); }
+
+        // --- UI LOGIC (MODALS) ---
+        function openModal(id) { 
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            setTimeout(() => m.firstElementChild.nextElementSibling.classList.remove('scale-90', 'opacity-0'), 10); // Simple animate
+        }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        
+        function showModal(type, title, msg) {
+            const m = document.getElementById('statusModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = msg;
+            const icon = document.getElementById('modalIcon');
+            
+            if(type === 'success') {
+                icon.className = "mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-5 bg-green-100 text-green-600";
+                icon.innerHTML = '<i class="fas fa-check text-2xl"></i>';
+            } else {
+                icon.className = "mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-5 bg-red-100 text-red-600";
+                icon.innerHTML = '<i class="fas fa-times text-2xl"></i>';
+            }
+            m.classList.remove('hidden');
+        }
+
+        function openProfileModal() {
+            if(!currentUser) return;
+            document.getElementById('modalUsername').innerText = currentUser.username;
+            document.getElementById('modalRole').innerText = currentUser.role;
+            const av = document.getElementById('modalAvatar');
+            if(currentUser.photo && currentUser.photo.startsWith('http')) {
+                av.innerHTML = ''; av.style.backgroundImage = `url('${currentUser.photo}')`;
+            } else { av.innerHTML = '<i class="fas fa-user"></i>'; av.style.backgroundImage = 'none'; }
+            document.getElementById('changePassForm').classList.add('hidden');
+            openModal('profileModal');
+        }
+
+        function confirmLogout() { closeModal('profileModal'); openModal('logoutConfirmModal'); }
+
+        // --- INPUT FEATURE ---
+        function generateMenu(role) {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+            const menus = [
+                { id: 'harian', label: 'Kamar', icon: 'fa-bed', roles: ['admin', 'keamanan'], groupBy: 'kamar', color: 'bg-blue-50 text-blue-600' },
+                { id: 'muhadhoroh', label: 'Muhadhoroh', icon: 'fa-microphone', roles: ['admin', 'bahasa'], groupBy: 'kelas', color: 'bg-purple-50 text-purple-600' },
+                { id: 'halaqoh', label: 'Halaqoh', icon: 'fa-quran', roles: ['admin', 'peribadatan'], groupBy: 'kelas', color: 'bg-yellow-50 text-yellow-600' },
+                { id: 'pramuka', label: 'Pramuka', icon: 'fa-campground', roles: ['admin', 'kordinator'], groupBy: 'kelas', color: 'bg-orange-50 text-orange-600' },
+                { id: 'olahraga', label: 'Olahraga', icon: 'fa-futbol', roles: ['admin', 'olahraga'], groupBy: 'kelas', color: 'bg-green-50 text-green-600' },
+                { id: 'kesenian', label: 'Kesenian', icon: 'fa-paint-brush', roles: ['admin', 'kesenian'], groupBy: 'kelas', color: 'bg-pink-50 text-pink-600' }
+            ];
+            
+            menus.forEach(m => {
+                if(m.roles.includes(role.toLowerCase())) {
+                    const btn = document.createElement('button');
+                    btn.className = "status-card flex flex-col items-center p-4 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-300 group";
+                    btn.onclick = () => setupInputForm(m);
+                    btn.innerHTML = `
+                        <div class="h-12 w-12 rounded-full ${m.color} dark:bg-opacity-20 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas ${m.icon}"></i>
+                        </div>
+                        <span class="font-bold text-gray-700 dark:text-gray-300 text-sm">${m.label}</span>
+                    `;
+                    grid.appendChild(btn);
+                }
+            });
+        }
+
+        function setupInputForm(menu) {
+            const prompt = document.getElementById('selectPrompt');
+            const form = document.getElementById('formContainer');
+            const badge = document.getElementById('activeCategoryBadge');
+            const inputType = document.getElementById('absensiType');
+            const listContainer = document.getElementById('studentListContainer');
+
+            if(prompt) prompt.classList.add('hidden');
+            if(form) form.classList.remove('hidden');
+            if(badge) badge.innerText = menu.label;
+            if(inputType) inputType.value = menu.id;
+            if(listContainer) listContainer.classList.add('hidden');
+            
+            const select = document.getElementById('groupSelect');
+            select.innerHTML = '<option value="">-- Pilih --</option>';
+            
+            const labelMap = (menu.groupBy === 'kamar') ? {text:"Pilih Kamar", set: listKamar, idx:4} : {text:"Pilih Kelas", set: listKelas, idx:3};
+            
+            // Safety check for groupLabel
+            const groupLabel = document.getElementById('groupLabel');
+            if(groupLabel) groupLabel.innerText = labelMap.text;
+            
+            select.dataset.filterMode = labelMap.idx;
+            
+            Array.from(labelMap.set).sort().forEach(item => {
+                const opt = document.createElement('option'); opt.value = item; opt.innerText = item; select.appendChild(opt);
+            });
+            
+            // Scroll to form
+            if(form) form.scrollIntoView({behavior: 'smooth'});
+        }
+
+        function loadGroupStudents() {
+            const select = document.getElementById('groupSelect');
+            if (!select.value) { document.getElementById('studentListContainer').classList.add('hidden'); return; }
+            
+            const filterIdx = parseInt(select.dataset.filterMode);
+            const filtered = studentsDataRaw.filter(row => row[filterIdx] == select.value);
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+            
+            filtered.forEach((s, i) => {
+                // Card-like row for better mobile experience
+                const html = `
+                    <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700" data-id="${s[0]}" data-nama="${s[1]}">
+                        <td class="text-center p-4 text-gray-400 font-mono text-xs">${i+1}</td>
+                        <td class="p-4">
+                            <div class="font-bold text-gray-800 dark:text-white">${s[1]}</div>
+                            <div class="text-xs text-gray-400">${s[0]}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="flex justify-center items-center gap-2 status-card">
+                                <div class="relative">
+                                    <input type="radio" name="status-${i}" id="s-${i}" value="Sakit" class="status-radio hidden peer">
+                                    <label for="s-${i}" class="cursor-pointer w-8 h-8 rounded-lg border border-yellow-200 text-yellow-600 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-800 flex items-center justify-center font-bold text-xs transition-all">S</label>
+                                </div>
+                                <div class="relative">
+                                    <input type="radio" name="status-${i}" id="i-${i}" value="Izin" class="status-radio hidden peer">
+                                    <label for="i-${i}" class="cursor-pointer w-8 h-8 rounded-lg border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:border-blue-800 flex items-center justify-center font-bold text-xs transition-all">I</label>
+                                </div>
+                                <div class="relative">
+                                    <input type="radio" name="status-${i}" id="a-${i}" value="Alpha" class="status-radio hidden peer">
+                                    <label for="a-${i}" class="cursor-pointer w-8 h-8 rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:border-red-800 flex items-center justify-center font-bold text-xs transition-all">A</label>
+                                </div>
+                                <button onclick="resetRow(${i})" class="ml-2 h-8 w-8 rounded-full text-gray-300 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Reset"><i class="fas fa-undo text-xs"></i></button>
+                            </div>
+                        </td>
+                    </tr>`;
+                tbody.insertAdjacentHTML('beforeend', html);
+            });
+            
+            const container = document.getElementById('studentListContainer');
+            container.classList.remove('hidden');
+            // Simple animate in
+            container.style.opacity = 0;
+            setTimeout(() => { container.style.transition = 'opacity 0.5s'; container.style.opacity = 1; }, 50);
+        }
+
+        window.resetRow = function(index) { document.getElementsByName(`status-${index}`).forEach(r => r.checked = false); };
+
+        async function submitBulkAttendance() {
+            const agenda = document.getElementById('agendaInput').value;
+            if(!agenda) return showModal('error', 'Agenda Kosong', 'Mohon isi keterangan kegiatan.');
+            
+            const btn = document.getElementById('btnKirim');
+            const origText = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<div class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>';
+
+            const entries = [];
+            document.querySelectorAll('#studentTableBody tr').forEach(tr => {
+                const status = tr.querySelector('input[type="radio"]:checked')?.value;
+                if(status) entries.push({id: tr.dataset.id, nama: tr.dataset.nama, status: status});
+            });
+
+            if(entries.length === 0) {
+                btn.disabled = false; btn.innerHTML = origText;
+                return showModal('success', 'Info', 'Semua santri tercatat Hadir (Nihil).');
+            }
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'text/plain'},
+                    body: JSON.stringify({ action: 'input_absensi', tipe: document.getElementById('absensiType').value, agenda: agenda, pelapor: currentUser.username, entries: entries })
+                });
+                showModal('success', 'Berhasil', `${entries.length} data ketidakhadiran disimpan.`);
+                // Reset Form
+                document.getElementById('groupSelect').value = '';
+                document.getElementById('studentListContainer').classList.add('hidden');
+                document.getElementById('agendaInput').value = '';
+                loadDashboardStats(); // Refresh stats
+            } catch(e) { showModal('error', 'Gagal', 'Terjadi kesalahan koneksi.'); }
+            finally { btn.disabled = false; btn.innerHTML = origText; }
+        }
+
+        // --- RECAPITULATION ---
+        function showPage(p) {
+            ['pageInput', 'pageRekap', 'pagePortal'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            // Reset nav active states
+            ['navInput', 'navRekap'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('bg-green-50', 'text-green-700');
+                el.classList.add('text-gray-600');
+                el.firstElementChild.classList.remove('bg-green-600', 'text-white');
+                el.firstElementChild.classList.add('bg-gray-100', 'text-gray-500');
+            });
+
+            const activeMap = { 'input': 'navInput', 'rekap': 'navRekap' };
+            if(activeMap[p]) {
+                const el = document.getElementById(activeMap[p]);
+                el.classList.add('bg-green-50', 'text-green-700');
+                el.classList.remove('text-gray-600');
+                el.firstElementChild.classList.add('bg-green-600', 'text-white');
+                el.firstElementChild.classList.remove('bg-gray-100', 'text-gray-500');
+            }
+            
+            if(p === 'input') { 
+                document.getElementById('pageInput').classList.remove('hidden'); 
+                document.getElementById('pageTitle').innerText = "Input Absensi";
+            }
+            if(p === 'rekap') { 
+                document.getElementById('pageRekap').classList.remove('hidden'); 
+                document.getElementById('pageTitle').innerText = "Rekapitulasi";
+                loadRecapData(1); 
+            }
+            if(p === 'portal') {
+                document.getElementById('pagePortal').classList.remove('hidden');
+                document.getElementById('pageTitle').innerText = "Pencarian";
+            }
+            
+            if(window.innerWidth < 768) toggleSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+
+        function openPublicPortal() { document.getElementById('publicPortal').classList.remove('hidden'); }
+        function closePublicPortal() { document.getElementById('publicPortal').classList.add('hidden'); }
+
+        async function searchStudentHistory(context) {
+            const idInput = context === 'public' ? 'publicSearchId' : 'internalSearchId';
+            const resDiv = context === 'public' ? 'publicResult' : 'internalResult';
+            const nameEl = context === 'public' ? 'publicName' : 'internalName';
+            const bodyEl = context === 'public' ? 'publicHistoryBody' : 'internalHistoryBody';
+            // Extra elements for internal details
+            const classEl = document.getElementById('internalClass');
+            const roomEl = document.getElementById('internalRoom');
+            
+            const id = document.getElementById(idInput).value;
+            if(!id) return alert("Masukkan ID Santri");
+
+            const s = studentsDataRaw.find(row => row[0] == id);
+            
+            // Update Info Header
+            if(s) {
+                document.getElementById(nameEl).innerText = s[1];
+                if(context === 'internal') {
+                    if(classEl) classEl.innerText = s[3] || '-';
+                    if(roomEl) roomEl.innerText = s[4] || '-';
+                }
+            } else {
+                document.getElementById(nameEl).innerText = "ID: " + id;
+                if(context === 'internal') {
+                    if(classEl) classEl.innerText = '-';
+                    if(roomEl) roomEl.innerText = '-';
+                }
+            }
+
+            document.getElementById(resDiv).classList.remove('hidden'); 
+            document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400 animate-pulse">Sedang memuat data...</td></tr>';
+            
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getStudentHistory&id=${id}`);
+                const json = await res.json();
+                if(json.result === 'success' && json.data.length > 0) {
+                    document.getElementById(bodyEl).innerHTML = json.data.slice(0,10).map(r => {
+                        const color = r[2]==='Sakit'?'bg-yellow-100 text-yellow-800': r[2]==='Izin'?'bg-blue-100 text-blue-800': r[2]==='Alpha'?'bg-red-100 text-red-800':'bg-green-100 text-green-800';
+                        let tgl = r[0]; try { tgl = new Date(r[0]).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}); } catch(e){}
+                        return `<tr class="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                            <td class="p-3 text-xs font-mono text-gray-500 dark:text-gray-400">${tgl}</td>
+                            <td class="p-3">
+                                <div class="font-bold text-xs uppercase text-gray-400 mb-0.5">${r[3]}</div>
+                                <div class="text-sm text-gray-800 dark:text-gray-200">${r[4]}</div>
+                            </td>
+                            <td class="p-3 text-center"><span class="px-2 py-1 rounded-lg text-xs font-bold ${color}">${r[2]}</span></td>
+                        </tr>`;
+                    }).join('');
+                } else { document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada riwayat absensi.</td></tr>'; }
+            } catch(e) { document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">Gagal memuat data.</td></tr>'; }
+        }
+
+        async function loadRecapData(page) {
+            const type = document.getElementById('rekapSourceSelect').value;
+            const loader = document.getElementById('rekapLoader');
+            const table = document.querySelector('#rekapTableBody').parentNode;
+            
+            if (page === 1) {
+                loader.classList.remove('hidden');
+                table.classList.add('opacity-50');
+                try {
+                    const res = await fetch(`${SCRIPT_URL}?action=getRecap&tipe=${type}`);
+                    const json = await res.json();
+                    if(json.result === 'success') {
+                        fullRecapData = json.data.reverse();
+                        currentPage = 1;
+                        renderTable();
+                        // Update chart/stats based on selection
+                        calculateTopStats(fullRecapData);
+                        updateChart(fullRecapData);
+                    }
+                } catch(e) { console.error(e); }
+                loader.classList.add('hidden');
+                table.classList.remove('opacity-50');
+            } else { currentPage = page; renderTable(); }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('rekapTableBody');
+            const start = (currentPage-1)*rowsPerPage;
+            const data = fullRecapData.slice(start, start+rowsPerPage);
+            tbody.innerHTML = data.map((r, i) => {
+                const s = r[4];
+                const color = s==='Sakit'?'bg-yellow-100 text-yellow-800': s==='Izin'?'bg-blue-100 text-blue-800': s==='Alpha'?'bg-red-100 text-red-800':'bg-green-100 text-green-800';
+                let t = r[0]; try { t = new Date(r[0]).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); } catch(x){}
+                return `<tr class="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                    <td class="px-6 py-4 text-gray-400 font-mono text-xs">${start+i+1}</td>
+                    <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">${t}</td>
+                    <td class="px-6 py-4 font-bold text-gray-800 dark:text-gray-200">${r[2]}</td>
+                    <td class="px-6 py-4 text-xs text-gray-600 dark:text-gray-400 max-w-xs truncate">${r[3]}</td>
+                    <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-full text-xs font-bold ${color}">${s}</span></td>
+                    <td class="px-6 py-4 text-xs text-gray-400 font-mono">${r[5]}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('pageInfo').innerText = `Halaman ${currentPage}`;
+            document.getElementById('btnPrev').disabled = currentPage === 1;
+            document.getElementById('btnNext').disabled = (start + rowsPerPage) >= fullRecapData.length;
+        }
+
+        function changePage(d) { 
+            const maxPage = Math.ceil(fullRecapData.length / rowsPerPage);
+            if(currentPage + d > 0 && currentPage + d <= maxPage) {
+                currentPage += d; renderTable(); 
+            }
+        }
+
+        // STATS & CHARTS
+        function calculateTopStats(data) {
+            const stats = {};
+            data.forEach(r => {
+                const n = r[2], s = r[4];
+                if(!stats[n]) stats[n] = { S:0, I:0, A:0 };
+                if(s==='Sakit') stats[n].S++; if(s==='Izin') stats[n].I++; if(s==='Alpha') stats[n].A++;
+            });
+            const findMax = (key, label, icon, color) => {
+                let maxVal = 0; let person = '-';
+                for(const name in stats) { if(stats[name][key] > maxVal) { maxVal = stats[name][key]; person = name; } }
+                return `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition hover:shadow-md">
+                    <div class="h-12 w-12 rounded-2xl ${color} flex items-center justify-center text-xl shadow-sm"><i class="fas ${icon}"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">${label} Terbanyak</p>
+                        <h4 class="font-bold text-gray-800 dark:text-white truncate text-lg">${person}</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400"><span class="font-bold text-gray-800 dark:text-gray-200 text-lg">${maxVal}</span> kali</p>
+                    </div>
+                </div>`;
+            };
+            document.getElementById('topStatsContainer').innerHTML = 
+                findMax('S', 'Sakit', 'bed-pulse', 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600') + 
+                findMax('I', 'Izin', 'envelope-open-text', 'bg-blue-50 dark:bg-blue-900/20 text-blue-600') + 
+                findMax('A', 'Alpha', 'times-circle', 'bg-red-50 dark:bg-red-900/20 text-red-600');
         }
 
         async function loadDashboardStats() {
@@ -321,284 +1031,7 @@
                     calculateTopStats(harianData);
                     updateChart(harianData);
                 }
-            } catch(e) {}
-        }
-
-        function processGroups() {
-            studentsDataRaw.forEach(row => {
-                if(row[3]) listKelas.add(row[3]);
-                if(row[4]) listKamar.add(row[4]);
-            });
-        }
-
-        // --- AUTH ---
-        async function handleLogin(e) {
-            e.preventDefault();
-            const uInput = document.getElementById('username').value.trim();
-            const pInput = document.getElementById('password').value.trim();
-            const loader = document.getElementById('loginLoader');
-            const err = document.getElementById('loginError');
-
-            loader.classList.remove('hidden');
-            err.classList.add('hidden');
-
-            if(!dataReady) await loadPromise;
-
-            setTimeout(() => {
-                const user = usersData.find(x => String(x.username).toLowerCase() === uInput.toLowerCase() && String(x.password) === pInput);
-                const isEmergency = (usersData.length===0 && uInput==='SiJaoGithub' && pInput==='Dulido@216326');
-
-                if(user || isEmergency) {
-                    currentUser = user ? user : {username:'SiJaoGothub', role:'admin', photo:'https://ik.imagekit.io/dulidobogor/image/upload/7266/a6de9b806cb817ac8c4391b7896d9719.JPG?tr=w-300,h-300,fo-face,z-0.75'};
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('pageInput').classList.remove('hidden');
-                    document.getElementById('sidebarUsername').innerText = currentUser.username;
-                    document.getElementById('sidebarRole').innerText = currentUser.role;
-                    
-                    const sideAv = document.getElementById('sidebarAvatar');
-                    if(currentUser.photo && currentUser.photo.startsWith('http')) {
-                        sideAv.innerHTML = '';
-                        sideAv.style.backgroundImage = `url('${currentUser.photo}')`;
-                    } else {
-                        sideAv.style.backgroundImage = 'none';
-                        sideAv.innerHTML = '<i class="fas fa-user"></i>';
-                    }
-                    generateMenu(currentUser.role);
-                } else {
-                    err.innerText = "Username/Password Salah!";
-                    err.classList.remove('hidden');
-                }
-                loader.classList.add('hidden');
-            }, 800);
-        }
-
-        // --- MODALS ---
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        
-        function openProfileModal() {
-            if(!currentUser) return;
-            document.getElementById('modalUsername').innerText = currentUser.username;
-            document.getElementById('modalRole').innerText = currentUser.role;
-            const avatarEl = document.getElementById('modalAvatar');
-            if(currentUser.photo && currentUser.photo.startsWith('http')) {
-                avatarEl.innerHTML = '';
-                avatarEl.style.backgroundImage = `url('${currentUser.photo}')`;
-            } else {
-                avatarEl.style.backgroundImage = 'none';
-                avatarEl.innerHTML = '<i class="fas fa-user"></i>';
-            }
-            document.getElementById('changePassForm').classList.add('hidden');
-            openModal('profileModal');
-        }
-
-        function confirmLogout() { closeModal('profileModal'); openModal('logoutConfirmModal'); }
-        function performLogout() { location.reload(); }
-
-        function showModal(type, title, msg) {
-            const m = document.getElementById('statusModal');
-            const icon = document.getElementById('modalIcon');
-            const tit = document.getElementById('modalTitle');
-            const ms = document.getElementById('modalMessage');
-            m.classList.remove('hidden');
-            tit.innerText = title; ms.innerText = msg;
-            icon.className = type==='success' ? "mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-green-100" : "mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 bg-red-100";
-            icon.innerHTML = type==='success' ? '<i class="fas fa-check text-green-600 text-2xl"></i>' : '<i class="fas fa-times text-red-600 text-2xl"></i>';
-        }
-
-        // --- WRITES (Signup & Pass) ---
-        async function doSignup() {
-            const u = document.getElementById('newUsername').value;
-            const p = document.getElementById('newPassword').value;
-            const r = document.getElementById('newRole').value;
-            const btn = document.getElementById('btnSignup');
-            if(!u || !p) return alert("Lengkapi data");
-            
-            btn.innerHTML = "Loading..."; btn.disabled = true;
-            try {
-                await fetch(SCRIPT_URL, {
-                    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({action:'signup', username:u, password:p, role:r})
-                });
-                closeModal('signupModal'); 
-                showModal('success','Sukses','Akun berhasil dibuat. Silakan login (tunggu beberapa saat hingga data tersinkron).');
-                // Update lokal (Optimistic UI update not possible due to CSV cache delay)
-            } catch(e) { showModal('error','Gagal','Error'); }
-            finally { btn.innerHTML = "Daftar"; btn.disabled = false; }
-        }
-
-        async function doChangePassword() {
-            const o = document.getElementById('cpOld').value;
-            const n = document.getElementById('cpNew').value;
-            const btn = document.getElementById('btnCP');
-            if(!o || !n) return alert("Lengkapi data");
-            btn.innerHTML = "Loading..."; btn.disabled = true;
-            try {
-                await fetch(SCRIPT_URL, {
-                    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({action:'change_password', username:currentUser.username, oldPassword:o, newPassword:n})
-                });
-                closeModal('profileModal'); 
-                showModal('success','Info','Permintaan ganti password dikirim.');
-            } catch(e) { showModal('error','Gagal','Koneksi Error'); }
-            finally { btn.innerHTML = "Simpan Password"; btn.disabled = false; }
-        }
-
-        // --- INPUT & RECAP ---
-        function generateMenu(role) {
-            const grid = document.getElementById('categoryGrid');
-            grid.innerHTML = '';
-            const menus = [
-                { id: 'harian', label: 'Kamar', icon: 'fa-bed', roles: ['admin', 'keamanan'], groupBy: 'kamar' },
-                { id: 'muhadhoroh', label: 'Muhadhoroh', icon: 'fa-microphone', roles: ['admin', 'bahasa'], groupBy: 'kelas' },
-                { id: 'halaqoh', label: 'Halaqoh', icon: 'fa-quran', roles: ['admin', 'peribadatan'], groupBy: 'kelas' },
-                { id: 'pramuka', label: 'Pramuka', icon: 'fa-campground', roles: ['admin', 'kordinator'], groupBy: 'kelas' },
-                { id: 'olahraga', label: 'Olahraga', icon: 'fa-futbol', roles: ['admin', 'olahraga'], groupBy: 'kelas' },
-                { id: 'kesenian', label: 'Kesenian', icon: 'fa-paint-brush', roles: ['admin', 'kesenian'], groupBy: 'kelas' }
-            ];
-            menus.forEach(m => {
-                if(m.roles.includes(role.toLowerCase())) {
-                    const btn = document.createElement('button');
-                    btn.className = "flex flex-col items-center p-2 rounded border hover:bg-green-50";
-                    btn.onclick = () => setupInputForm(m);
-                    btn.innerHTML = `<i class="fas ${m.icon} text-green-600 text-xl mb-1"></i><span>${m.label}</span>`;
-                    grid.appendChild(btn);
-                }
-            });
-        }
-
-        function setupInputForm(menu) {
-            document.getElementById('selectPrompt').classList.add('hidden');
-            document.getElementById('formContainer').classList.remove('hidden');
-            document.getElementById('activeCategoryBadge').innerText = menu.label;
-            document.getElementById('absensiType').value = menu.id;
-            document.getElementById('studentListContainer').classList.add('hidden');
-            const select = document.getElementById('groupSelect');
-            select.innerHTML = '<option value="">-- Pilih --</option>';
-            document.getElementById('groupLabel').innerText = (menu.groupBy === 'kamar') ? "Pilih Kamar" : "Pilih Kelas";
-            let sourceSet = (menu.groupBy === 'kamar') ? listKamar : listKelas;
-            select.dataset.filterMode = (menu.groupBy === 'kamar') ? 4 : 3; 
-            Array.from(sourceSet).sort().forEach(item => {
-                const opt = document.createElement('option'); opt.value = item; opt.innerText = item; select.appendChild(opt);
-            });
-        }
-
-        function loadGroupStudents() {
-            const select = document.getElementById('groupSelect');
-            if (!select.value) { document.getElementById('studentListContainer').classList.add('hidden'); return; }
-            const filterIdx = parseInt(select.dataset.filterMode);
-            const filtered = studentsDataRaw.filter(row => row[filterIdx] == select.value);
-            const tbody = document.getElementById('studentTableBody');
-            tbody.innerHTML = '';
-            filtered.forEach((s, i) => {
-                const html = `
-                    <tr class="hover:bg-gray-50 border-b" data-id="${s[0]}" data-nama="${s[1]}">
-                        <td class="text-center p-2">${i+1}</td>
-                        <td class="p-2 font-medium">${s[1]}</td>
-                        <td class="p-2 text-center">
-                            <div class="flex justify-center items-center space-x-1">
-                                <div class="inline-block"><input type="radio" name="status-${i}" id="s-${i}" value="Sakit" class="status-radio hidden"><label for="s-${i}" class="cursor-pointer px-3 py-1 rounded-md border text-xs font-bold text-yellow-700 border-yellow-200 hover:bg-yellow-50 transition">S</label></div>
-                                <div class="inline-block"><input type="radio" name="status-${i}" id="i-${i}" value="Izin" class="status-radio hidden"><label for="i-${i}" class="cursor-pointer px-3 py-1 rounded-md border text-xs font-bold text-blue-700 border-blue-200 hover:bg-blue-50 transition">I</label></div>
-                                <div class="inline-block"><input type="radio" name="status-${i}" id="a-${i}" value="Alpha" class="status-radio hidden"><label for="a-${i}" class="cursor-pointer px-3 py-1 rounded-md border text-xs font-bold text-red-700 border-red-200 hover:bg-red-50 transition">A</label></div>
-                                <button type="button" onclick="resetRow(${i})" class="ml-2 text-gray-400 hover:text-gray-600"><i class="fas fa-times-circle"></i></button>
-                            </div>
-                        </td>
-                    </tr>`;
-                tbody.insertAdjacentHTML('beforeend', html);
-            });
-            document.getElementById('studentListContainer').classList.remove('hidden');
-        }
-
-        window.resetRow = function(index) { document.getElementsByName(`status-${index}`).forEach(r => r.checked = false); };
-
-        async function submitBulkAttendance() {
-            const btn = document.getElementById('btnKirim');
-            const agenda = document.getElementById('agendaInput').value;
-            if(!agenda) return showModal('error', 'Gagal', "Isi Agenda dulu.");
-            btn.disabled = true; btn.innerHTML = "Mengirim...";
-            const entries = [];
-            document.querySelectorAll('#studentTableBody tr').forEach(tr => {
-                const statusInput = tr.querySelector('input[type="radio"]:checked');
-                if (statusInput) entries.push({ id: tr.dataset.id, nama: tr.dataset.nama, status: statusInput.value });
-            });
-            if (entries.length === 0) { btn.disabled = false; btn.innerHTML = "Kirim Data"; return showModal('success', 'Info', "Nihil (Semua Hadir)."); }
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ action:'input_absensi', tipe: document.getElementById('absensiType').value, agenda: agenda, pelapor: currentUser.username, entries: entries })
-                });
-                showModal('success', 'Berhasil', `Disimpan ${entries.length} data.`);
-                document.getElementById('groupSelect').value = "";
-                document.getElementById('studentListContainer').classList.add('hidden');
-                document.getElementById('agendaInput').value = "";
-                loadDashboardStats();
-            } catch(e) { showModal('error', 'Gagal', "Koneksi Error."); }
-            finally { btn.disabled = false; btn.innerHTML = "Kirim Data"; }
-        }
-
-        function showPage(p) {
-            document.getElementById('pageInput').classList.add('hidden');
-            document.getElementById('pageRekap').classList.add('hidden');
-            if(p==='input') document.getElementById('pageInput').classList.remove('hidden');
-            else { document.getElementById('pageRekap').classList.remove('hidden'); loadRecapData(1); }
-            if(window.innerWidth < 768) toggleSidebar();
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.toggle('hidden');
-        }
-
-        async function loadRecapData(page) {
-            const type = document.getElementById('rekapSourceSelect').value;
-            const loader = document.getElementById('rekapLoader');
-            if (page === 1) {
-                loader.classList.remove('hidden');
-                try {
-                    const res = await fetch(`${SCRIPT_URL}?action=getRecap&tipe=${type}`);
-                    const json = await res.json();
-                    if(json.result === 'success') {
-                        fullRecapData = json.data.reverse();
-                        currentPage = 1;
-                    }
-                } catch(e) { console.error(e); }
-                loader.classList.add('hidden');
-            } else { currentPage = page; }
-            renderTable();
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('rekapTableBody');
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const pageData = fullRecapData.slice(start, end);
-            tbody.innerHTML = '';
-            if(pageData.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">Kosong.</td></tr>';
-            else pageData.forEach((r, i) => {
-                let t = r[0]; try { t = new Date(r[0]).toLocaleString('id-ID'); } catch(x){}
-                const html = `<tr class="border-b border-gray-100"><td>${start+i+1}</td><td class="text-xs text-gray-500">${t}</td><td class="font-medium">${r[2]}</td><td class="text-xs">${r[3]}</td><td><span class="px-2 py-0.5 rounded text-xs font-bold ${r[4]==='Sakit'?'bg-yellow-100 text-yellow-800':r[4]==='Izin'?'bg-blue-100 text-blue-800':'bg-red-100 text-red-800'}">${r[4]}</span></td><td class="text-xs text-gray-500">${r[5]}</td></tr>`;
-                tbody.insertAdjacentHTML('beforeend', html);
-            });
-            document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${Math.ceil(fullRecapData.length / rowsPerPage) || 1}`;
-            document.getElementById('btnPrev').disabled = currentPage === 1;
-            document.getElementById('btnNext').disabled = end >= fullRecapData.length;
-        }
-
-        function changePage(dir) { loadRecapData(currentPage + dir); }
-
-        function calculateTopStats(data) {
-            const stats = {};
-            data.forEach(r => {
-                const name = r[2]; const status = r[4];
-                if(!stats[name]) stats[name] = { S:0, I:0, A:0 };
-                if(status === 'Sakit') stats[name].S++; else if(status === 'Izin') stats[name].I++; else if(status === 'Alpha') stats[name].A++;
-            });
-            const findMax = (key, color, label) => {
-                let maxVal = 0; let person = '-';
-                for(const name in stats) { if(stats[name][key] > maxVal) { maxVal = stats[name][key]; person = name; } }
-                return `<div class="bg-white p-4 rounded-xl shadow border-l-4 ${color}"><p class="text-xs text-gray-500 uppercase">${label} Terbanyak</p><h4 class="font-bold text-gray-800 truncate">${person}</h4><p class="text-xl font-bold">${maxVal} <span class="text-xs font-normal">Kali</span></p></div>`;
-            };
-            document.getElementById('topStatsContainer').innerHTML = findMax('S','border-yellow-500','Sakit') + findMax('I','border-blue-500','Izin') + findMax('A','border-red-500','Alpha');
+            } catch(e) { console.error("Stats load failed", e); }
         }
 
         function updateChart(rows) {
@@ -608,11 +1041,13 @@
             const monday = new Date(d.setDate(diff));
             const labels = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
             const dataMap = {}; const keys = [];
+
             for(let i=0; i<7; i++) {
                 let temp = new Date(monday); temp.setDate(monday.getDate()+i);
                 const Y=temp.getFullYear(), M=String(temp.getMonth()+1).padStart(2,'0'), D=String(temp.getDate()).padStart(2,'0');
                 const k = `${Y}-${M}-${D}`; keys.push(k); dataMap[k] = {H:0, S:0, I:0, A:0};
             }
+
             rows.forEach(r => {
                 let dateKey = "";
                 if(r[6]) dateKey = r[6].substring(0,10);
@@ -621,6 +1056,7 @@
                     if(s==='Hadir') dataMap[dateKey].H++; else if(s==='Sakit') dataMap[dateKey].S++; else if(s==='Izin') dataMap[dateKey].I++; else if(s==='Alpha') dataMap[dateKey].A++;
                 }
             });
+
             if(chartInstance) chartInstance.destroy();
             const ctx = document.getElementById('attendanceChart').getContext('2d');
             chartInstance = new Chart(ctx, {
@@ -628,14 +1064,56 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Hadir', data: keys.map(k=>dataMap[k].H), borderColor: '#16a34a', fill: true, backgroundColor: 'rgba(22,163,74,0.2)', tension: 0.4 },
-                        { label: 'Sakit', data: keys.map(k=>dataMap[k].S), borderColor: '#eab308', fill: true, backgroundColor: 'rgba(234,179,8,0.2)', tension: 0.4 },
-                        { label: 'Izin', data: keys.map(k=>dataMap[k].I), borderColor: '#3b82f6', fill: true, backgroundColor: 'rgba(59,130,246,0.2)', tension: 0.4 },
-                        { label: 'Alpha', data: keys.map(k=>dataMap[k].A), borderColor: '#dc2626', fill: true, backgroundColor: 'rgba(220,38,38,0.2)', tension: 0.4 }
+                        { label: 'Hadir', data: keys.map(k=>dataMap[k].H), borderColor: '#16a34a', fill: true, backgroundColor: 'rgba(22,163,74,0.1)', tension: 0.4, pointRadius: 4 },
+                        { label: 'Sakit', data: keys.map(k=>dataMap[k].S), borderColor: '#eab308', fill: false, tension: 0.4, borderDash: [5, 5] },
+                        { label: 'Izin', data: keys.map(k=>dataMap[k].I), borderColor: '#3b82f6', fill: false, tension: 0.4, borderDash: [5, 5] },
+                        { label: 'Alpha', data: keys.map(k=>dataMap[k].A), borderColor: '#dc2626', fill: false, tension: 0.4 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20, color: document.documentElement.classList.contains('dark') ? '#fff' : '#666' } } },
+                    scales: { 
+                        y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4], color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb' }, ticks: { color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280' } }, 
+                        x: { grid: { display: false }, ticks: { color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280' } } 
+                    } 
+                }
             });
+        }
+
+        // --- User Mgmt (Signup/Change Pass) ---
+        async function doSignup() {
+            const u = document.getElementById('newUsername').value;
+            const p = document.getElementById('newPassword').value;
+            const r = document.getElementById('newRole').value;
+            const btn = document.getElementById('btnSignup');
+            if(!u || !p) return alert("Lengkapi data");
+            btn.innerHTML = "Memproses..."; btn.disabled = true;
+            try {
+                await fetch(SCRIPT_URL, {
+                    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({action:'signup', username:u, password:p, role:r})
+                });
+                closeModal('signupModal'); showModal('success','Sukses','Akun dibuat. Silakan login (Tunggu 5 menit jika sinkronisasi CSV).');
+            } catch(e) { showModal('error','Gagal','Error'); }
+            finally { btn.innerHTML = "Daftar"; btn.disabled = false; }
+        }
+
+        async function doChangePassword() {
+            const o = document.getElementById('cpOld').value;
+            const n = document.getElementById('cpNew').value;
+            const btn = document.getElementById('btnCP');
+            if(!o || !n) return alert("Lengkapi data");
+            btn.innerHTML = "Menyimpan..."; btn.disabled = true;
+            try {
+                await fetch(SCRIPT_URL, {
+                    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({action:'change_password', username:currentUser.username, oldPassword:o, newPassword:n})
+                });
+                closeModal('profileModal'); showModal('success','Info','Permintaan dikirim.');
+            } catch(e) { showModal('error','Gagal','Error'); }
+            finally { btn.innerHTML = "Simpan Password"; btn.disabled = false; }
         }
     </script>
 </body>
