@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEM  ABSENSI TERPADU</title>
+    <title>Sistem Absensi Terpadu - Daarul 'Uluum Lido</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Tailwind config untuk mengaktifkan dark mode via class
@@ -76,12 +76,12 @@
 <body class="h-screen overflow-hidden flex text-gray-800 antialiased dark:text-gray-100">
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar bg-white dark:bg-gray-900 w-72 h-full shadow-xl fixed md:relative z-30 transform -translate-x-full md:translate-x-0 flex flex-col border-r border-gray-100 dark:border-gray-700">
+    <aside id="sidebar" class="sidebar bg-white dark:bg-gray-900 w-72 h-full shadow-xl fixed md:relative z-30 transform -translate-x-full md:translate-x-0 flex flex-col border-r border-gray-100 dark:border-gray-800">
         <!-- Brand -->
         <div class="h-20 flex items-center justify-center border-b border-gray-100 dark:border-gray-700 px-6">
             <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" alt="Logo" class="h-10 w-10 mr-3 object-contain">
             <div class="text-left">
-                <h1 class="font-bold text-lg leading-tight text-green-800 dark:text-green-400">Daarul 'Uuum Lido</h1>
+                <h1 class="font-bold text-lg leading-tight text-green-800 dark:text-green-400">Daarul 'Uluum Lido</h1>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 tracking-wider uppercase font-semibold">Sistem Absensi Terpadu</p>
             </div>
         </div>
@@ -98,7 +98,7 @@
             </button>
             
             <button onclick="showPage('rekap')" id="navRekap" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all hover:shadow-sm group">
-                    <span class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center mr-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <span class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center mr-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                     <i class="fas fa-chart-pie"></i>
                 </span>
                 Rekapitulasi
@@ -166,7 +166,7 @@
                         <div class="w-20 h-20 bg-green-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
                             <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" class="w-12 h-12 object-contain">
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Selamat Datang</h2>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Welcome</h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Silakan login untuk melanjutkan</p>
                     </div>
 
@@ -181,7 +181,7 @@
                         </div>
                         
                         <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-200 dark:shadow-none transform active:scale-95 transition-all duration-200 flex justify-center items-center">
-                            <span>Masuk Aplikasi</span>
+                            <span>Masuk</span>
                             <!-- Simple Spinner -->
                             <div id="loginLoader" class="hidden ml-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                         </button>
@@ -189,11 +189,10 @@
 
                     <div class="mt-6 flex justify-between text-sm font-medium">
                         <button onclick="openModal('signupModal')" class="text-gray-500 hover:text-green-600 dark:hover:text-green-400 transition-colors">Buat Akun?</button>
-                        <button onclick="openPublicPortal()" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors">Cek Portal Wali</button>
+                        <button onclick="openPublicPortal()" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors">Portal Wali</button>
                     </div>
 
                     <div id="loginError" class="mt-4 hidden p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded-lg text-center border border-red-100 dark:border-red-800 font-medium animate-pulse"></div>
-                    <div id="defaultUserHint" class="mt-2 text-center hidden text-[10px] text-gray-400">Database Mode: Offline/CSV</div>
                 </div>
             </div>
 
@@ -203,14 +202,13 @@
                     <div class="text-center mb-8">
                         <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" class="h-20 mx-auto mb-4">
                         <h2 class="text-3xl font-bold text-green-800 dark:text-green-400">Portal Wali Santri</h2>
-                        <p class="text-gray-500 dark:text-gray-400">Pantau kehadiran putra/putri Anda secara real-time</p>
+                        <p class="text-gray-500 dark:text-gray-400">Pantau kehadiran Anak Anda secara real-time</p>
                     </div>
                     
                     <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-6 border border-gray-100 dark:border-gray-700">
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">ID Santri / NIS</label>
                         <div class="flex gap-2 mb-6">
                             <input type="text" id="publicSearchId" class="flex-1 px-5 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-green-500 outline-none font-mono text-lg dark:text-white" placeholder="Contoh: 12345">
-                            <!-- Search Button with Loading State -->
                             <button onclick="searchStudentHistory('public')" class="bg-green-600 text-white px-6 rounded-xl hover:bg-green-700 shadow-lg shadow-green-100 dark:shadow-none transition-all flex items-center justify-center min-w-[60px]">
                                 <i class="fas fa-search"></i>
                             </button>
@@ -241,7 +239,7 @@
                             <div class="max-h-64 overflow-y-auto rounded-2xl border border-gray-100 dark:border-gray-700">
                                 <table class="w-full text-sm text-left">
                                     <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 sticky top-0">
-                                        <tr><th class="p-3 font-semibold">Tanggal</th><th class="p-3 font-semibold">Ket</th><th class="p-3 font-semibold text-center">Status</th></tr>
+                                        <tr><th class="p-3 font-semibold">Tanggal</th><th class="p-3 font-semibold">Kegiatan</th><th class="p-3 font-semibold text-center">Status</th></tr>
                                     </thead>
                                     <tbody id="publicHistoryBody" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"></tbody>
                                 </table>
@@ -249,7 +247,7 @@
                         </div>
                     </div>
                     <button onclick="closePublicPortal()" class="mt-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
-                        <i class="fas fa-arrow-left"></i> Kembali ke Login
+                        <i class="fas fa-arrow-left"></i> Kembali
                     </button>
                 </div>
             </div>
@@ -261,7 +259,7 @@
                     <div class="absolute right-0 top-0 h-full w-1/2 bg-white/5 transform skew-x-12 translate-x-20"></div>
                     <div class="relative z-10">
                         <h2 class="text-3xl font-bold mb-2">Input Absensi</h2>
-                        <p class="text-green-100 opacity-90">Silakan pilih kategori absensi di bawah ini untuk memulai pencatatan.</p>
+                        <p class="text-green-100 opacity-90">Silakan pilih kategori absensi di bawah ini untuk memulai mencatat.</p>
                     </div>
                 </div>
 
@@ -292,7 +290,7 @@
                                 </div>
                             </div>
                             <div class="space-y-2">
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">Agenda / Keterangan</label>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">Keterangan</label>
                                 <input type="text" id="agendaInput" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all dark:text-white" placeholder="Contoh: Materi Fiqih / Senam Pagi">
                             </div>
                         </div>
@@ -307,7 +305,7 @@
                                     <ul class="list-disc list-inside opacity-90 space-y-1">
                                         <li>Secara <i>default</i> semua santri dianggap <b>Hadir</b>.</li>
                                         <li>Klik tombol <b>S</b>, <b>I</b>, atau <b>A</b> hanya untuk santri yang berhalangan.</li>
-                                        <li>Klik ikon <i class="fas fa-times-circle"></i> untuk membatalkan pilihan (kembali Hadir).</li>
+                                        <li>Klik ikon <i class="fas fa-times-circle"></i> untuk membatalkan pilihan.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -334,6 +332,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="selectPrompt" class="p-10 text-center text-gray-400"><i class="fas fa-hand-pointer text-3xl mb-2"></i><p>Silakan pilih menu di atas.</p></div>
             </div>
 
             <!-- REKAP PAGE -->
@@ -360,7 +359,7 @@
                     <!-- Chart Card -->
                     <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-bold text-gray-700 dark:text-gray-200">Tren Kehadiran (Mingguan)</h3>
+                            <h3 class="font-bold text-gray-700 dark:text-gray-200">Tren Ketidakhadiran (Mingguan)</h3>
                             <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Live Data</span>
                         </div>
                         <div class="h-72 w-full relative">
@@ -434,7 +433,7 @@
                         <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
                             <table class="w-full text-sm text-left">
                                 <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 uppercase font-bold text-xs">
-                                    <tr><th class="p-4">Tanggal</th><th class="p-4">Kegiatan</th><th class="p-4">Keterangan</th><th class="p-4 text-center">Status</th></tr>
+                                    <tr><th class="p-4">Tanggal</th><th class="p-4">Kegiatan (Jenis)</th><th class="p-4 text-center">Status</th></tr>
                                 </thead>
                                 <tbody id="internalHistoryBody" class="divide-y divide-gray-100 dark:divide-gray-700 dark:text-gray-200"></tbody>
                             </table>
@@ -503,7 +502,7 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         // CONFIGURATION
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9dvuu-YYLvM711KAoPL_NOurmw2YRLSZY68LtAU9BssHQFmukw8IJp_xJ42Ypon3Q/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEriDkP7OpvLDFzkQjbT1T8KWkwSrsQ7DCkhbhzltXCSoI-ME6-jLDAtmTVNF0XbHq/exec"; 
         const URL_USER_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAIpCKM-FLkgVPuNA9kEQWlUd_JTi-M1_43FC4mdV65-u83LWPMYkrtwtWBpDGB5Tds3ew9Yeq0H_W/pub?output=csv";
         
         // APP STATE
@@ -629,10 +628,10 @@
             setTimeout(() => {
                 const user = usersData.find(x => String(x.username).toLowerCase() === uInput.toLowerCase() && String(x.password) === pInput);
                 // Fallback for initial setup
-                const isEmergency = (usersData.length===0 && uInput==='admin' && pInput==='admin');
+                const isEmergency = (usersData.length===0 && uInput==='SiJaoGithub' && pInput==='Dulido@216326');
 
                 if(user || isEmergency) {
-                    currentUser = user ? user : {username:'Admin', role:'admin', photo:''};
+                    currentUser = user ? user : {username:'SiJaoGithub', role:'admin', photo:''};
                     localStorage.setItem('siakad_user', JSON.stringify(currentUser));
                     updateUIForUser();
                 } else {
@@ -720,7 +719,7 @@
                 if(m.roles.includes(role.toLowerCase())) {
                     const btn = document.createElement('button');
                     btn.className = "status-card flex flex-col items-center p-4 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-300 group";
-                    btn.onclick = () => setupInputForm(m);
+                    btn.onclick = (e) => setupInputForm(m, e.currentTarget);
                     btn.innerHTML = `
                         <div class="h-12 w-12 rounded-full ${m.color} dark:bg-opacity-20 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform duration-300">
                             <i class="fas ${m.icon}"></i>
@@ -732,18 +731,19 @@
             });
         }
 
-        function setupInputForm(menu) {
-            const prompt = document.getElementById('selectPrompt');
-            const form = document.getElementById('formContainer');
-            const badge = document.getElementById('activeCategoryBadge');
-            const inputType = document.getElementById('absensiType');
-            const listContainer = document.getElementById('studentListContainer');
+        function setupInputForm(menu, btnElement) {
+            // UI: Highlight Selection
+            if(selectedCategoryButton) selectedCategoryButton.classList.remove('active');
+            if(btnElement) {
+                btnElement.classList.add('active');
+                selectedCategoryButton = btnElement;
+            }
 
-            if(prompt) prompt.classList.add('hidden');
-            if(form) form.classList.remove('hidden');
-            if(badge) badge.innerText = menu.label;
-            if(inputType) inputType.value = menu.id;
-            if(listContainer) listContainer.classList.add('hidden');
+            document.getElementById('selectPrompt').classList.add('hidden');
+            document.getElementById('formContainer').classList.remove('hidden');
+            document.getElementById('activeCategoryBadge').innerText = menu.label;
+            document.getElementById('absensiType').value = menu.id;
+            document.getElementById('studentListContainer').classList.add('hidden');
             
             const select = document.getElementById('groupSelect');
             select.innerHTML = '<option value="">-- Pilih --</option>';
@@ -761,7 +761,7 @@
             });
             
             // Scroll to form
-            if(form) form.scrollIntoView({behavior: 'smooth'});
+            document.getElementById('formContainer').scrollIntoView({behavior: 'smooth'});
         }
 
         function loadGroupStudents() {
@@ -889,48 +889,33 @@
             document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
-        function openPublicPortal() { 
-            document.getElementById('loginSection').classList.add('hidden'); // Sembunyikan login
-            document.getElementById('publicPortal').classList.remove('hidden'); 
-        }
-        
-        function closePublicPortal() { 
-            document.getElementById('publicPortal').classList.add('hidden'); 
-            document.getElementById('loginSection').classList.remove('hidden'); // Tampilkan login
-        }
+        function openPublicPortal() { document.getElementById('publicPortal').classList.remove('hidden'); }
+        function closePublicPortal() { document.getElementById('publicPortal').classList.add('hidden'); }
 
         async function searchStudentHistory(context) {
-            // Await data loading if accessing directly
-            if (!dataReady && loadPromise) {
-                const btn = document.querySelector(context === 'public' ? '#publicSearchId + button' : '#internalSearchId + button');
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                try { await loadPromise; } catch(e){}
-                btn.innerHTML = originalHtml;
-                btn.disabled = false;
-            }
-
             const idInput = context === 'public' ? 'publicSearchId' : 'internalSearchId';
             const resDiv = context === 'public' ? 'publicResult' : 'internalResult';
             const nameEl = context === 'public' ? 'publicName' : 'internalName';
             const bodyEl = context === 'public' ? 'publicHistoryBody' : 'internalHistoryBody';
-            // Detail elements
+            // Extra elements for internal details
             const classEl = document.getElementById(context === 'public' ? 'publicClass' : 'internalClass');
             const roomEl = document.getElementById(context === 'public' ? 'publicRoom' : 'internalRoom');
             
             const id = document.getElementById(idInput).value;
             if(!id) return alert("Masukkan ID Santri");
 
-            // Find student locally
+            // Await loading if needed (Safety)
+            if(!dataReady && loadPromise) {
+                try { await loadPromise; } catch(e){}
+            }
+
             const s = studentsDataRaw.find(row => row[0] == id);
             
             document.getElementById(resDiv).classList.remove('hidden');
             
-            // Update Header Info immediately
+            // Update Info Header
             if(s) {
                 document.getElementById(nameEl).innerText = s[1];
-                // Update class & room for both contexts
                 if(classEl) classEl.innerText = s[3] || '-';
                 if(roomEl) roomEl.innerText = s[4] || '-';
             } else {
@@ -939,15 +924,17 @@
                 if(roomEl) roomEl.innerText = '-';
             }
 
-            document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400 animate-pulse">Sedang memuat riwayat...</td></tr>';
+            bodyEl.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400 animate-pulse">Sedang memuat data...</td></tr>';
             
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getStudentHistory&id=${id}`);
                 const json = await res.json();
                 if(json.result === 'success' && json.data.length > 0) {
-                    document.getElementById(bodyEl).innerHTML = json.data.slice(0,10).map(r => {
-                        const color = r[2]==='Sakit'?'bg-yellow-100 text-yellow-800': r[2]==='Izin'?'bg-blue-100 text-blue-800': r[2]==='Alpha'?'bg-red-100 text-red-800':'bg-green-100 text-green-800';
+                    bodyEl.innerHTML = json.data.slice(0,10).map(r => {
+                        // r = [Tgl, Nama, Status, Tipe, Agenda]
+                        const color = r[2]==='Sakit'?'text-yellow-600 bg-yellow-50': r[2]==='Izin'?'text-blue-600 bg-blue-50': r[2]==='Alpha'?'text-red-600 bg-red-50':'text-green-600 bg-green-50';
                         let tgl = r[0]; try { tgl = new Date(r[0]).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}); } catch(e){}
+                        // Display TYPE/JENIS in the middle column
                         return `<tr class="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                             <td class="p-3 text-xs font-mono text-gray-500 dark:text-gray-400">${tgl}</td>
                             <td class="p-3">
@@ -957,8 +944,8 @@
                             <td class="p-3 text-center"><span class="px-2 py-1 rounded-lg text-xs font-bold ${color}">${r[2]}</span></td>
                         </tr>`;
                     }).join('');
-                } else { document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada riwayat absensi.</td></tr>'; }
-            } catch(e) { document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">Gagal memuat data.</td></tr>'; }
+                } else { bodyEl.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada riwayat absensi.</td></tr>'; }
+            } catch(e) { bodyEl.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">Gagal memuat data.</td></tr>'; }
         }
 
         async function loadRecapData(page) {
@@ -1027,19 +1014,16 @@
                 let maxVal = 0; let person = '-';
                 for(const name in stats) { if(stats[name][key] > maxVal) { maxVal = stats[name][key]; person = name; } }
                 return `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition hover:shadow-md">
-                    <div class="h-12 w-12 rounded-2xl ${color} flex items-center justify-center text-xl shadow-sm"><i class="fas ${icon}"></i></div>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border dark:border-gray-700 flex items-center gap-4 transition hover:shadow-md">
+                    <div class="h-12 w-12 rounded-xl ${color} flex items-center justify-center text-xl"><i class="fas ${icon}"></i></div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">${label} Terbanyak</p>
-                        <h4 class="font-bold text-gray-800 dark:text-white truncate text-lg">${person}</h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400"><span class="font-bold text-gray-800 dark:text-gray-200 text-lg">${maxVal}</span> kali</p>
+                        <p class="text-xs text-gray-400 uppercase font-bold">${label} Terbanyak</p>
+                        <h4 class="font-bold truncate dark:text-gray-100">${person}</h4>
+                        <p class="text-sm dark:text-gray-400"><span class="font-bold text-lg">${maxVal}</span> kali</p>
                     </div>
                 </div>`;
             };
-            document.getElementById('topStatsContainer').innerHTML = 
-                findMax('S', 'Sakit', 'bed-pulse', 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600') + 
-                findMax('I', 'Izin', 'envelope-open-text', 'bg-blue-50 dark:bg-blue-900/20 text-blue-600') + 
-                findMax('A', 'Alpha', 'times-circle', 'bg-red-50 dark:bg-red-900/20 text-red-600');
+            document.getElementById('topStatsContainer').innerHTML = findMax('S','Sakit','bed-pulse','bg-yellow-50 text-yellow-600') + findMax('I','Izin','envelope-open-text','bg-blue-50 text-blue-600') + findMax('A','Alpha','times-circle','bg-red-50 text-red-600');
         }
 
         async function loadDashboardStats() {
@@ -1051,13 +1035,11 @@
                     calculateTopStats(harianData);
                     updateChart(harianData);
                 }
-            } catch(e) { console.error("Stats load failed", e); }
+            } catch(e){}
         }
 
         function updateChart(rows) {
-            const d = new Date();
-            const day = d.getDay();
-            const diff = d.getDate() - day + (day == 0 ? -6:1);
+            const d = new Date(), day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6:1);
             const monday = new Date(d.setDate(diff));
             const labels = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
             const dataMap = {}; const keys = [];
@@ -1065,15 +1047,15 @@
             for(let i=0; i<7; i++) {
                 let temp = new Date(monday); temp.setDate(monday.getDate()+i);
                 const Y=temp.getFullYear(), M=String(temp.getMonth()+1).padStart(2,'0'), D=String(temp.getDate()).padStart(2,'0');
-                const k = `${Y}-${M}-${D}`; keys.push(k); dataMap[k] = {H:0, S:0, I:0, A:0};
+                keys.push(`${Y}-${M}-${D}`); dataMap[`${Y}-${M}-${D}`] = {H:0, S:0, I:0, A:0};
             }
 
             rows.forEach(r => {
-                let dateKey = "";
-                if(r[6]) dateKey = r[6].substring(0,10);
-                if(dataMap[dateKey]) {
+                let k = r[6] ? r[6].substring(0,10) : '';
+                if(dataMap[k]) {
                     const s = r[4];
-                    if(s==='Hadir') dataMap[dateKey].H++; else if(s==='Sakit') dataMap[dateKey].S++; else if(s==='Izin') dataMap[dateKey].I++; else if(s==='Alpha') dataMap[dateKey].A++;
+                    // Removed Hadir logic from chart data population as requested
+                    if(s==='Sakit') dataMap[k].S++; else if(s==='Izin') dataMap[k].I++; else if(s==='Alpha') dataMap[k].A++;
                 }
             });
 
@@ -1084,56 +1066,56 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Hadir', data: keys.map(k=>dataMap[k].H), borderColor: '#16a34a', fill: true, backgroundColor: 'rgba(22,163,74,0.1)', tension: 0.4, pointRadius: 4 },
-                        { label: 'Sakit', data: keys.map(k=>dataMap[k].S), borderColor: '#eab308', fill: false, tension: 0.4, borderDash: [5, 5] },
-                        { label: 'Izin', data: keys.map(k=>dataMap[k].I), borderColor: '#3b82f6', fill: false, tension: 0.4, borderDash: [5, 5] },
+                        // Removed Hadir Dataset
+                        { label: 'Sakit', data: keys.map(k=>dataMap[k].S), borderColor: '#eab308', fill: false, tension: 0.4 },
+                        { label: 'Izin', data: keys.map(k=>dataMap[k].I), borderColor: '#3b82f6', fill: false, tension: 0.4 },
                         { label: 'Alpha', data: keys.map(k=>dataMap[k].A), borderColor: '#dc2626', fill: false, tension: 0.4 }
                     ]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20, color: document.documentElement.classList.contains('dark') ? '#fff' : '#666' } } },
-                    scales: { 
-                        y: { beginAtZero: true, max: 100, grid: { borderDash: [2, 4], color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb' }, ticks: { color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280' } }, 
-                        x: { grid: { display: false }, ticks: { color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280' } } 
-                    } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'bottom', labels: { color: document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#666' } } } }
             });
         }
 
-        // --- User Mgmt (Signup/Change Pass) ---
+        // USER ACTIONS
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function showModal(type, title, msg) {
+            const m = document.getElementById('statusModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = msg;
+            document.getElementById('modalIcon').innerHTML = type==='success' ? '<i class="fas fa-check text-green-600 text-3xl"></i>' : '<i class="fas fa-times text-red-600 text-3xl"></i>';
+            m.classList.remove('hidden');
+        }
+        
+        function openProfileModal() {
+            if(!currentUser) return;
+            document.getElementById('modalUsername').innerText = currentUser.username;
+            document.getElementById('modalRole').innerText = currentUser.role;
+            openModal('profileModal');
+        }
+        function confirmLogout() { closeModal('profileModal'); openModal('logoutConfirmModal'); }
+        function performLogout() { localStorage.removeItem('siakad_user'); location.reload(); }
+
         async function doSignup() {
-            const u = document.getElementById('newUsername').value;
-            const p = document.getElementById('newPassword').value;
-            const r = document.getElementById('newRole').value;
-            const btn = document.getElementById('btnSignup');
+            const u = document.getElementById('newUsername').value, p = document.getElementById('newPassword').value, r = document.getElementById('newRole').value, btn = document.getElementById('btnSignup');
             if(!u || !p) return alert("Lengkapi data");
-            btn.innerHTML = "Memproses..."; btn.disabled = true;
+            btn.innerText = "Loading..."; btn.disabled = true;
             try {
-                await fetch(SCRIPT_URL, {
-                    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({action:'signup', username:u, password:p, role:r})
-                });
-                closeModal('signupModal'); showModal('success','Sukses','Akun dibuat. Silakan login (Tunggu 5 menit jika sinkronisasi CSV).');
+                await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'signup', username:u, password:p, role:r}) });
+                closeModal('signupModal'); showModal('success','Sukses','Akun dibuat.'); initData();
             } catch(e) { showModal('error','Gagal','Error'); }
-            finally { btn.innerHTML = "Daftar"; btn.disabled = false; }
+            finally { btn.innerText = "Daftar"; btn.disabled = false; }
         }
 
         async function doChangePassword() {
-            const o = document.getElementById('cpOld').value;
-            const n = document.getElementById('cpNew').value;
-            const btn = document.getElementById('btnCP');
+            const o = document.getElementById('cpOld').value, n = document.getElementById('cpNew').value, btn = document.getElementById('btnCP');
             if(!o || !n) return alert("Lengkapi data");
-            btn.innerHTML = "Menyimpan..."; btn.disabled = true;
+            btn.innerText = "Loading..."; btn.disabled = true;
             try {
-                await fetch(SCRIPT_URL, {
-                    method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({action:'change_password', username:currentUser.username, oldPassword:o, newPassword:n})
-                });
-                closeModal('profileModal'); showModal('success','Info','Permintaan dikirim.');
+                await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'change_password', username:currentUser.username, oldPassword:o, newPassword:n}) });
+                closeModal('profileModal'); showModal('success','Info','Terkirim.');
             } catch(e) { showModal('error','Gagal','Error'); }
-            finally { btn.innerHTML = "Simpan Password"; btn.disabled = false; }
+            finally { btn.innerText = "Simpan"; btn.disabled = false; }
         }
     </script>
 </body>
