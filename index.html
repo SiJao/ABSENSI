@@ -198,7 +198,7 @@
             </div>
 
             <!-- PUBLIC PORTAL -->
-            <div id="publicPortal" class="fixed inset-0 z-40 bg-white dark:bg-gray-900 overflow-y-auto hidden fade-in">
+            <div id="publicPortal" class="fixed inset-0 z-[60] bg-white dark:bg-gray-900 overflow-y-auto hidden fade-in">
                 <div class="max-w-md mx-auto min-h-screen flex flex-col justify-center p-6">
                     <div class="text-center mb-8">
                         <img src="https://assets-web-du.s3.ap-southeast-1.amazonaws.com/wp-content/uploads/2019/01/05054727/logodu.png" class="h-20 mx-auto mb-4">
@@ -210,7 +210,10 @@
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">ID Santri / NIS</label>
                         <div class="flex gap-2 mb-6">
                             <input type="text" id="publicSearchId" class="flex-1 px-5 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-green-500 outline-none font-mono text-lg dark:text-white" placeholder="Contoh: 12345">
-                            <button onclick="searchStudentHistory('public')" class="bg-green-600 text-white px-6 rounded-xl hover:bg-green-700 shadow-lg shadow-green-100 dark:shadow-none transition-all"><i class="fas fa-search"></i></button>
+                            <!-- Search Button with Loading State -->
+                            <button onclick="searchStudentHistory('public')" class="bg-green-600 text-white px-6 rounded-xl hover:bg-green-700 shadow-lg shadow-green-100 dark:shadow-none transition-all flex items-center justify-center min-w-[60px]">
+                                <i class="fas fa-search"></i>
+                            </button>
                         </div>
 
                         <div id="publicResult" class="hidden space-y-4">
@@ -886,40 +889,57 @@
             document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
 
-        function openPublicPortal() { document.getElementById('publicPortal').classList.remove('hidden'); }
-        function closePublicPortal() { document.getElementById('publicPortal').classList.add('hidden'); }
+        function openPublicPortal() { 
+            document.getElementById('loginSection').classList.add('hidden'); // Sembunyikan login
+            document.getElementById('publicPortal').classList.remove('hidden'); 
+        }
+        
+        function closePublicPortal() { 
+            document.getElementById('publicPortal').classList.add('hidden'); 
+            document.getElementById('loginSection').classList.remove('hidden'); // Tampilkan login
+        }
 
         async function searchStudentHistory(context) {
+            // Await data loading if accessing directly
+            if (!dataReady && loadPromise) {
+                const btn = document.querySelector(context === 'public' ? '#publicSearchId + button' : '#internalSearchId + button');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+                try { await loadPromise; } catch(e){}
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+
             const idInput = context === 'public' ? 'publicSearchId' : 'internalSearchId';
             const resDiv = context === 'public' ? 'publicResult' : 'internalResult';
             const nameEl = context === 'public' ? 'publicName' : 'internalName';
             const bodyEl = context === 'public' ? 'publicHistoryBody' : 'internalHistoryBody';
-            // Extra elements for internal details
-            const classEl = document.getElementById('internalClass');
-            const roomEl = document.getElementById('internalRoom');
+            // Detail elements
+            const classEl = document.getElementById(context === 'public' ? 'publicClass' : 'internalClass');
+            const roomEl = document.getElementById(context === 'public' ? 'publicRoom' : 'internalRoom');
             
             const id = document.getElementById(idInput).value;
             if(!id) return alert("Masukkan ID Santri");
 
+            // Find student locally
             const s = studentsDataRaw.find(row => row[0] == id);
             
-            // Update Info Header
+            document.getElementById(resDiv).classList.remove('hidden');
+            
+            // Update Header Info immediately
             if(s) {
                 document.getElementById(nameEl).innerText = s[1];
-                if(context === 'internal') {
-                    if(classEl) classEl.innerText = s[3] || '-';
-                    if(roomEl) roomEl.innerText = s[4] || '-';
-                }
+                // Update class & room for both contexts
+                if(classEl) classEl.innerText = s[3] || '-';
+                if(roomEl) roomEl.innerText = s[4] || '-';
             } else {
-                document.getElementById(nameEl).innerText = "ID: " + id;
-                if(context === 'internal') {
-                    if(classEl) classEl.innerText = '-';
-                    if(roomEl) roomEl.innerText = '-';
-                }
+                document.getElementById(nameEl).innerText = "ID: " + id + " (Tidak Ditemukan)";
+                if(classEl) classEl.innerText = '-';
+                if(roomEl) roomEl.innerText = '-';
             }
 
-            document.getElementById(resDiv).classList.remove('hidden'); 
-            document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400 animate-pulse">Sedang memuat data...</td></tr>';
+            document.getElementById(bodyEl).innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400 animate-pulse">Sedang memuat riwayat...</td></tr>';
             
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getStudentHistory&id=${id}`);
