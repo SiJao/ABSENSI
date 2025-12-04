@@ -1,0 +1,98 @@
+:root {
+    --bg-light: #f8fafc;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    transition: background-color 0.3s;
+}
+
+.sidebar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.submenu.open {
+    max-height: 500px;
+    transition: max-height 0.5s ease-in;
+}
+
+.rotate-icon {
+    transition: transform 0.3s;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+html.dark body {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+.status-card input:checked + div {
+    border-color: currentColor;
+    background-color: currentColor;
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.status-card div {
+    transition: all 0.2s;
+}
+
+.menu-card {
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.menu-card.active {
+    border-color: #16a34a;
+    background-color: #f0fdf4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);
+}
+
+.dark .menu-card.active {
+    background-color: #14532d;
+    border-color: #22c55e;
+}
+
+.loader {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #166534;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
