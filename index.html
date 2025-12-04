@@ -5,21 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Administrasi - Daarul 'Uluum Lido</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Custom Theming */
         :root { --bg-light: #f8fafc; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); transition: background-color 0.3s, color 0.3s; }
-        .font-pesantren { font-family: 'Amiri', serif; }
-        
-        /* Smooth Transitions */
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); transition: background-color 0.3s; }
         .sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -27,46 +21,15 @@
         .submenu.open { max-height: 500px; transition: max-height 0.5s ease-in; }
         .rotate-icon { transition: transform 0.3s; }
         .rotate-180 { transform: rotate(180deg); }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        
-        /* Dark Mode Base */
         html.dark body { background-color: #0f172a; color: #e2e8f0; }
-        
-        /* Status Cards */
-        .status-card input:checked + div { border-color: currentColor; background-color: currentColor; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        .status-card div { transition: all 0.2s ease; }
-        
-        /* Menu Card Active */
+        .status-card input:checked + div { border-color: currentColor; background-color: currentColor; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .status-card div { transition: all 0.2s; }
         .menu-card { transition: all 0.2s; border: 2px solid transparent; }
         .menu-card.active { border-color: #16a34a; background-color: #f0fdf4; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2); }
         .dark .menu-card.active { background-color: #14532d; border-color: #22c55e; }
-
-        /* Loader */
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #166534; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* FULLCALENDAR DARK MODE OVERRIDES */
-        .dark .fc-theme-standard td, .dark .fc-theme-standard th { border-color: #374151; }
-        .dark .fc-toolbar-title { color: #f3f4f6; }
-        .dark .fc-button-primary { background-color: #374151; border-color: #4b5563; color: #fff; }
-        .dark .fc-button-primary:hover { background-color: #4b5563; border-color: #6b7280; }
-        .dark .fc-button-active { background-color: #16a34a !important; border-color: #16a34a !important; }
-        .dark .fc-daygrid-day-number { color: #d1d5db; }
-        .dark .fc-col-header-cell-cushion { color: #e5e7eb; }
-        .dark .fc-list-day-cushion { background-color: #1f2937; }
-        .dark .fc-list-event:hover td { background-color: #374151; }
     </style>
-    <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
 </head>
 <body class="h-screen overflow-hidden flex text-gray-800 antialiased dark:text-gray-100">
 
@@ -210,9 +173,8 @@
                 <div id="makanResult" class="mt-4 text-center hidden p-4 rounded-xl bg-green-100 text-green-800 font-bold">Berhasil: <span id="makanNama">-</span></div>
             </div>
 
-            <!-- AGENDA, SURAT, SEARCH PORTALS (Structure Kept) -->
+            <!-- AGENDA, SURAT, SEARCH PORTALS -->
             <div id="pageAgenda" class="max-w-7xl mx-auto hidden fade-in h-full"><div id='calendar' class="h-full bg-white p-4 rounded-2xl shadow"></div></div>
-            
             <div id="pageInputSurat" class="max-w-4xl mx-auto hidden fade-in">
                 <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Input Surat</h2>
                 <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-8">
@@ -270,22 +232,21 @@
     </div>
 
     <!-- MODALS -->
-    <div id="statusModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('statusModal')"></div><div class="bg-white dark:bg-gray-800 p-6 rounded-2xl relative z-10 max-w-sm w-full text-center"><div id="modalIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-5"></div><h3 id="modalTitle" class="font-bold dark:text-white"></h3><p id="modalMessage" class="text-sm my-4 dark:text-gray-300"></p><button onclick="closeModal('statusModal')" class="w-full bg-gray-100 dark:bg-gray-700 dark:text-white py-2 rounded font-bold">OK</button></div></div>
-    <div id="profileModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('profileModal')"></div><div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-sm relative z-10 overflow-hidden"><div class="bg-green-700 h-24 relative"><button onclick="closeModal('profileModal')" class="absolute top-4 right-4 text-white"><i class="fas fa-times text-xl"></i></button></div><div class="px-6 pb-8 text-center relative"><div class="-mt-12 mb-4 inline-block"><div id="modalAvatar" class="w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 bg-gray-200 flex items-center justify-center text-4xl bg-cover bg-center"><i class="fas fa-user"></i></div></div><h3 id="modalUsername" class="text-2xl font-bold dark:text-white">User</h3><span id="modalRole" class="inline-block bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold uppercase mb-6">Role</span><button onclick="confirmLogout()" class="w-full mt-6 p-3 text-red-600 font-bold bg-red-50 dark:bg-red-900/20 rounded-xl">Keluar</button></div></div></div>
+    <div id="statusModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50" onclick="closeModal('statusModal')"></div><div class="bg-white dark:bg-gray-800 p-6 rounded-2xl relative z-10 max-w-sm w-full text-center"><div id="modalIcon" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full mb-5"></div><h3 id="modalTitle" class="font-bold dark:text-white"></h3><p id="modalMessage" class="text-sm my-4 dark:text-gray-300"></p><button onclick="closeModal('statusModal')" class="w-full bg-gray-100 dark:bg-gray-700 dark:text-white py-2 rounded font-bold">OK</button></div></div>
+    <div id="profileModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50" onclick="closeModal('profileModal')"></div><div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-sm relative z-10 overflow-hidden"><div class="bg-green-700 h-24 relative"><button onclick="closeModal('profileModal')" class="absolute top-4 right-4 text-white"><i class="fas fa-times text-xl"></i></button></div><div class="px-6 pb-8 text-center relative"><div class="-mt-12 mb-4 inline-block"><div id="modalAvatar" class="w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 bg-gray-200 flex items-center justify-center text-4xl bg-cover bg-center"><i class="fas fa-user"></i></div></div><h3 id="modalUsername" class="text-2xl font-bold dark:text-white">User</h3><span id="modalRole" class="inline-block bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold uppercase mb-6">Role</span><button onclick="confirmLogout()" class="w-full mt-6 p-3 text-red-600 font-bold bg-red-50 dark:bg-red-900/20 rounded-xl">Keluar</button></div></div></div>
     <div id="logoutConfirmModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50" onclick="closeModal('logoutConfirmModal')"></div><div class="bg-white dark:bg-gray-800 p-6 rounded-2xl relative z-10 max-w-xs w-full text-center"><h3 class="font-bold dark:text-white mb-4">Keluar?</h3><div class="flex gap-3"><button onclick="closeModal('logoutConfirmModal')" class="flex-1 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white rounded">Batal</button><button onclick="performLogout()" class="flex-1 bg-red-600 text-white py-2 rounded">Ya</button></div></div></div>
-    <div id="signupModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('signupModal')"></div><div class="bg-white dark:bg-gray-800 p-8 rounded-3xl relative z-10 max-w-sm w-full shadow-2xl"><h3 class="font-bold text-2xl text-center mb-6 dark:text-white">Daftar Akun</h3><div class="space-y-4"><input id="newUsername" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:text-white" placeholder="Username"><input id="newPassword" type="password" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:text-white" placeholder="Password"><select id="newRole" class="w-full px-4 py-3 border rounded-xl bg-white dark:bg-gray-700 dark:text-white"><option value="keamanan">Keamanan</option><option value="bahasa">Bahasa</option><option value="peribadatan">Peribadatan</option><option value="kordinator">Kordinator</option><option value="olahraga">Olahraga</option><option value="kesenian">Kesenian</option><option value="kesehatan">Kesehatan</option><option value="logistik">Logistik</option><option value="dapur">Dapur</option></select></div><button onclick="doSignup()" id="btnSignup" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-xl mt-6">Daftar</button><button onclick="closeModal('signupModal')" class="w-full text-gray-400 text-sm mt-4">Batalkan</button></div></div>
+    <div id="signupModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50" onclick="closeModal('signupModal')"></div><div class="bg-white dark:bg-gray-800 p-8 rounded-3xl relative z-10 max-w-sm w-full shadow-2xl"><h3 class="font-bold text-2xl text-center mb-6 dark:text-white">Daftar Akun</h3><div class="space-y-4"><input id="newUsername" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:text-white" placeholder="Username"><input id="newPassword" type="password" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:text-white" placeholder="Password"><select id="newRole" class="w-full px-4 py-3 border rounded-xl bg-white dark:bg-gray-700 dark:text-white"><option value="keamanan">Keamanan</option><option value="bahasa">Bahasa</option><option value="peribadatan">Peribadatan</option><option value="kordinator">Kordinator</option><option value="olahraga">Olahraga</option><option value="kesenian">Kesenian</option><option value="kesehatan">Kesehatan</option><option value="logistik">Logistik</option><option value="dapur">Dapur</option></select></div><button onclick="doSignup()" id="btnSignup" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-xl mt-6">Daftar</button><button onclick="closeModal('signupModal')" class="w-full text-gray-400 text-sm mt-4">Batalkan</button></div></div>
 
     <script>
         // CONFIG
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDPpkiWvASrlf6phTfdLQwHEyWAoirLXaB3V3Orax5jlg8Ej6-sM6xBQc4QGwT5RfT/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw24x-uyRwP2PJBvNm_SntMFbgstizxoI_Z6LukL7uM1BOq6A35lBsu1axIwCtygwTH/exec"; 
         const URL_USER_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAIpCKM-FLkgVPuNA9kEQWlUd_JTi-M1_43FC4mdV65-u83LWPMYkrtwtWBpDGB5Tds3ew9Yeq0H_W/pub?output=csv";
-        const DRIVE_LINKS = { 'bahasa':'https://drive.google.com/drive/folders/1OwjT8dBnp8cujzeFT4UQtKnxOAHpJb1J?usp=drive_link', 'keamanan':'https://drive.google.com/drive/folders/1XMhWd_ZDxxsXk5RqhFNUNXkQgAe16Lne?usp=drive_link', 'peribadatan':'https://drive.google.com/drive/folders/1DivaBIEHMWMbfLjTW_SSknKMdBPBxlXD?usp=drive_link', 'kesenian':'https://drive.google.com/drive/folders/1laZnaUjI_XacKAl-H0-c6jTfPvW9keYN?usp=drive_link', 'olahraga':'https://drive.google.com/drive/folders/1XyrH7tzErsf40YB9HUA8cwhFakPV1LCs?usp=drive_link', 'kesehatan':'https://drive.google.com/drive/folders/1pzhhey-dqroFP6q_Taez8ivp81JBB84Q?usp=drive_link', 'logistik':'https://drive.google.com/drive/folders/127NURCUvrrMGGUeiFPTEObz28KOIsJiG?usp=drive_link', 'dapur':'https://drive.google.com/drive/folders/1edochzo9wO-quf97lHfC_IlWh4TMNKwp?usp=drive_link', 'kordinator':'https://drive.google.com/drive/folders/1PAdfoP0H4J4iUu9ttx3Vjv0mXp88vOpE?usp=drive_link', 'admin':'#' };
         
         let usersData=[], studentsDataRaw=[], currentUser=null, chartInstance=null, calendar=null, suratData=[];
         let listKamar=new Set(), listKelas=new Set(), selectedCategoryButton=null;
         let dataReady=false, loadPromise=null;
 
-        // INIT
+        // --- INIT ---
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID');
@@ -308,7 +269,7 @@
             if(localStorage.getItem('theme')==='dark') toggleDarkMode();
             const sess = localStorage.getItem('siakad_user');
             
-            // LOGIN LOGIC
+            // LOGIN LOGIC REVISION
             if(sess) { 
                 try { currentUser = JSON.parse(sess); updateUIForUser(); } 
                 catch(e) { document.getElementById('loginSection').classList.remove('hidden'); }
@@ -329,6 +290,7 @@
                     if(document.getElementById('statTotalSantri')) document.getElementById('statTotalSantri').innerText = studentsDataRaw.length;
                     dataReady = true;
                 }
+                // Load Users
                 const csvRes = await fetch(URL_USER_CSV);
                 const csvText = await csvRes.text();
                 usersData = parseCSVUser(csvText);
@@ -345,24 +307,48 @@
             return res;
         }
 
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('darkModeIcon');
+            const isDark = document.documentElement.classList.contains('dark');
+            icon.classList.replace(isDark?'fa-moon':'fa-sun', isDark?'fa-sun':'fa-moon');
+            localStorage.setItem('theme', isDark?'dark':'light');
+        }
+
+        function toggleSubmenu(id, btn) {
+            const el = document.getElementById(id);
+            const icon = btn.querySelector('.rotate-icon');
+            el.classList.toggle('open');
+            if(el.style.maxHeight){ el.style.maxHeight = null; icon.classList.remove('rotate-180'); } 
+            else { el.style.maxHeight = el.scrollHeight + "px"; icon.classList.add('rotate-180'); }
+        }
+
         // --- AUTH ---
         async function handleLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
+            const uInput = document.getElementById('username').value.trim();
+            const pInput = document.getElementById('password').value.trim();
             const loader = document.getElementById('loginLoader');
             const err = document.getElementById('loginError');
-            loader.classList.remove('hidden'); err.classList.add('hidden');
+
+            loader.classList.remove('hidden');
+            err.classList.add('hidden');
+
+            // Ensure data is loaded
             if(!dataReady && usersData.length === 0) await loadPromise;
+
             setTimeout(() => {
-                const user = usersData.find(x => x.username == u && x.password == p);
+                const user = usersData.find(x => String(x.username).toLowerCase() === uInput.toLowerCase() && String(x.password) === pInput);
                 if(user) {
                     currentUser = user;
                     localStorage.setItem('siakad_user', JSON.stringify(currentUser));
                     updateUIForUser();
-                } else { err.innerText = "Username/Password Salah!"; err.classList.remove('hidden'); }
+                } else {
+                    err.innerText = "Username atau Password Salah!";
+                    err.classList.remove('hidden');
+                }
                 loader.classList.add('hidden');
-            }, 500);
+            }, 800);
         }
 
         function updateUIForUser() {
@@ -383,9 +369,6 @@
         function performLogout() { localStorage.removeItem('siakad_user'); location.reload(); }
         function openDrive() { 
             if(currentUser.role === 'admin') {
-                // Admin logic to choose drive (simplified to open Bahasa for now or custom modal)
-                const links = Object.keys(DRIVE_LINKS).filter(k=>k!='admin').map(k=>`[${k.toUpperCase()}] ${DRIVE_LINKS[k]}`).join('\n');
-                // Ideal implementation: show modal with list. For brevity in bug fix:
                 const choice = prompt("Pilih Bagian (ketik nama):\nkeamanan, bahasa, peribadatan, kesenian, olahraga, kesehatan, logistik, dapur, kordinator");
                 if(choice && DRIVE_LINKS[choice.toLowerCase()]) window.open(DRIVE_LINKS[choice.toLowerCase()], '_blank');
             } else {
@@ -462,7 +445,7 @@
 
         async function submitBulkAttendance() {
             const agenda = document.getElementById('agendaInput').value;
-            if(!agenda) return showModal('error', 'Agenda Kosong', 'Mohon isi keterangan.');
+            if(!agenda) return showModal('error', 'Agenda Kosong', 'Mohon isi keterangan kegiatan.');
             const btn = document.getElementById('btnKirim');
             const origText = btn.innerHTML;
             btn.disabled = true; btn.innerHTML = 'Mengirim...';
@@ -607,8 +590,10 @@
 
         async function searchStudentHistory(context) {
             if(!dataReady && loadPromise) try { await loadPromise; } catch(e){}
-            const id = document.getElementById(context==='public'?'publicSearchId':'internalSearchId').value;
+            const idInput = context === 'public' ? 'publicSearchId' : 'internalSearchId';
+            const id = document.getElementById(idInput).value;
             if(!id) return alert("Masukkan ID");
+
             const resDiv = document.getElementById(context==='public'?'publicResult':'internalResult');
             const nameEl = document.getElementById(context==='public'?'publicName':'internalName');
             const bodyEl = document.getElementById(context==='public'?'publicHistoryBody':'internalHistoryBody');
@@ -630,8 +615,8 @@
                         let tgl = r[0]; try { tgl = new Date(r[0]).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}); } catch(e){}
                         return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"><td class="p-3 text-xs font-mono text-gray-500 dark:text-gray-400">${tgl}</td><td class="p-3"><div class="font-bold text-xs uppercase text-gray-400 mb-0.5">${r[3]}</div><div class="text-sm dark:text-gray-200">${r[4]}</div></td><td class="p-3 text-center"><span class="px-2 py-1 rounded-lg text-xs font-bold ${color}">${r[2]}</span></td></tr>`;
                     }).join('');
-                } else { bodyEl.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada riwayat absensi.</td></tr>'; }
-            } catch(e) { bodyEl.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">Gagal memuat data.</td></tr>'; }
+                } else { bodyEl.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada riwayat.</td></tr>'; }
+            } catch(e) { bodyEl.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">Error</td></tr>'; }
         }
 
         // --- RECAP & STATS ---
@@ -666,6 +651,7 @@
             document.getElementById('btnPrev').disabled = currentPage === 1;
             document.getElementById('btnNext').disabled = (start + rowsPerPage) >= fullRecapData.length;
         }
+
         function changePage(d) { if(currentPage+d>0) { currentPage += d; renderTable(); } }
 
         function calculateTopStats(data) {
@@ -695,7 +681,66 @@
                 options: { responsive: true, maintainAspectRatio: false, scales:{y:{beginAtZero:true}}, plugins:{legend:{position:'bottom'}} }
             });
         }
+// --- FUNGSI NAVIGASI HALAMAN (PENTING) ---
+        function showPage(p) {
+            // 1. Daftar semua ID Halaman
+            const pages = ['pageHome', 'pageInput', 'pageRekap', 'pagePortal', 'pageAgenda', 'pageInputSurat', 'pageRiwayatSurat', 'pageDisiplin', 'pageMedis', 'pageMakan'];
+            
+            // 2. Sembunyikan semua halaman (Safety check: pastikan elemen ada)
+            pages.forEach(id => { 
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden'); 
+            });
+            
+            // 3. Reset warna tombol menu sidebar
+            const navButtons = document.querySelectorAll('nav button');
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-green-50', 'text-green-700', 'dark:bg-gray-800');
+                btn.classList.add('text-gray-600', 'dark:text-gray-400');
+                // Reset ikon di dalamnya jika ada
+                if(btn.firstElementChild) {
+                     btn.firstElementChild.classList.remove('text-green-600');
+                }
+            });
 
+            // 4. Highlight tombol menu yang aktif
+            // Buat ID Navigasi otomatis: home -> navHome, input -> navInput
+            const activeNavId = 'nav' + p.charAt(0).toUpperCase() + p.slice(1);
+            const activeBtn = document.getElementById(activeNavId);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-green-50', 'text-green-700', 'dark:bg-gray-800');
+                activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+            }
+
+            // 5. Tampilkan halaman yang dipilih
+            const activePageId = 'page' + p.charAt(0).toUpperCase() + p.slice(1);
+            const activePage = document.getElementById(activePageId);
+            if(activePage) activePage.classList.remove('hidden');
+
+            // 6. Logika khusus per halaman (Load Data)
+            if(p === 'rekap') loadRecapData(1);
+            if(p === 'riwayatSurat') loadSuratHistory();
+            if(p === 'agenda') setTimeout(loadCalendar, 200);
+            
+            // Auto-fill jabatan pelapor jika user sudah login
+            if(currentUser) {
+                if(p === 'disiplin' && document.getElementById('disiplinBagian')) document.getElementById('disiplinBagian').value = currentUser.role;
+                if(p === 'inputSurat' && document.getElementById('suratJabatan')) document.getElementById('suratJabatan').value = currentUser.role;
+            }
+
+            // 7. Update Judul Header
+            const titleEl = document.getElementById('pageTitle');
+            if(titleEl) titleEl.innerText = p.replace(/([A-Z])/g, ' $1').toUpperCase(); // Spasi sebelum huruf besar
+
+            // 8. Tutup sidebar otomatis di HP
+            if(window.innerWidth < 768) {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('sidebarOverlay');
+                if(sb) sb.classList.add('-translate-x-full');
+                if(ov) ov.classList.add('hidden');
+            }
+        }
+        
         function toggleSubmenu(id, btn) { document.getElementById(id).classList.toggle('hidden'); }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
