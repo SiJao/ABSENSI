@@ -242,504 +242,212 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw24x-uyRwP2PJBvNm_SntMFbgstizxoI_Z6LukL7uM1BOq6A35lBsu1axIwCtygwTH/exec"; 
         const URL_USER_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAIpCKM-FLkgVPuNA9kEQWlUd_JTi-M1_43FC4mdV65-u83LWPMYkrtwtWBpDGB5Tds3ew9Yeq0H_W/pub?output=csv";
         
-        let usersData=[], studentsDataRaw=[], currentUser=null, chartInstance=null, calendar=null, suratData=[];
-        let listKamar=new Set(), listKelas=new Set(), selectedCategoryButton=null;
-        let dataReady=false, loadPromise=null;
+        // Pastikan variabel global
+let usersData = [], studentsDataRaw = [], currentUser = null, chartInstance = null, calendar = null, suratData = [];
+let listKamar = new Set(), listKelas = new Set(), selectedCategoryButton = null;
+let dataReady = false, loadPromise = null;
 
-        // --- INIT ---
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID');
-            document.getElementById('date').innerText = now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short'});
-            checkMealTime();
-        }, 1000);
+// --- INIT WAKTU DAN KEY ---
+setInterval(() => {
+    const now = new Date();
+    const clock = document.getElementById('clock');
+    const date = document.getElementById('date');
+    if (clock) clock.innerText = now.toLocaleTimeString('id-ID');
+    if (date) date.innerText = now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short'});
+    checkMealTime();
+}, 1000);
 
-        // Bind Enter Keys
-        ['disiplinId','medisId','makanId', 'publicSearchId', 'internalSearchId'].forEach(id=>{
-            const el=document.getElementById(id);
-            if(el) el.addEventListener('keypress', (e)=>{ if(e.key==='Enter') { 
-                if(id==='makanId') submitMakan();
-                else if(id==='publicSearchId') searchStudentHistory('public');
-                else if(id==='internalSearchId') searchStudentHistory('internal');
-                else searchForInput(el.value, id.replace('Id','')); 
-            }});
+// Binding event hanya jika elemen sudah ada
+function bindKeyListeners() {
+    const ids = ['disiplinId','medisId','makanId','publicSearchId','internalSearchId'];
+    ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (id==='makanId') submitMakan();
+                else if (id==='publicSearchId') searchStudentHistory('public');
+                else if (id==='internalSearchId') searchStudentHistory('internal');
+                else searchForInput(el.value, id.replace('Id',''));
+            }
         });
+    });
+}
 
-        window.onload = async () => {
-            if(localStorage.getItem('theme')==='dark') toggleDarkMode();
-            const sess = localStorage.getItem('siakad_user');
-            
-            // LOGIN LOGIC REVISION
-            if(sess) { 
-                try { currentUser = JSON.parse(sess); updateUIForUser(); } 
-                catch(e) { document.getElementById('loginSection').classList.remove('hidden'); }
-            } else {
-                document.getElementById('loginSection').classList.remove('hidden');
-            }
-            
-            loadPromise = initData();
-        };
+// -- WINDOW ONLOAD ---
+window.onload = async () => {
+    if(localStorage.getItem('theme')==='dark') toggleDarkMode();
+    const sess = localStorage.getItem('siakad_user');
+    if(sess) { 
+        try { currentUser = JSON.parse(sess); updateUIForUser(); } 
+        catch(e) { document.getElementById('loginSection').classList.remove('hidden'); }
+    } else {
+        document.getElementById('loginSection').classList.remove('hidden');
+    }
+    loadPromise = initData();
+    bindKeyListeners(); // Panggil setelah DOM siap
+};
 
-        async function initData() {
-            try {
-                const sRes = await fetch(SCRIPT_URL + '?action=getStudents');
-                const sJson = await sRes.json();
-                if(sJson.result === 'success') {
-                    studentsDataRaw = sJson.data;
-                    studentsDataRaw.forEach(r => { if(r[3]) listKelas.add(r[3]); if(r[4]) listKamar.add(r[4]); });
-                    if(document.getElementById('statTotalSantri')) document.getElementById('statTotalSantri').innerText = studentsDataRaw.length;
-                    dataReady = true;
-                }
-                // Load Users
-                const csvRes = await fetch(URL_USER_CSV);
-                const csvText = await csvRes.text();
-                usersData = parseCSVUser(csvText);
-                if(currentUser) loadDashboardStats();
-            } catch(e) { console.log("Offline mode/Error"); }
+// --- DATA ---
+async function initData() {
+    try {
+        const sRes = await fetch(SCRIPT_URL + '?action=getStudents');
+        const sJson = await sRes.json();
+        if(sJson.result === 'success') {
+            studentsDataRaw = sJson.data;
+            studentsDataRaw.forEach(r => { if(r[3]) listKelas.add(r[3]); if(r[4]) listKamar.add(r[4]); });
+            const statEl = document.getElementById('statTotalSantri');
+            if(statEl) statEl.innerText = studentsDataRaw.length;
+            dataReady = true;
         }
+        // Load Users
+        const csvRes = await fetch(URL_USER_CSV);
+        const csvText = await csvRes.text();
+        usersData = parseCSVUser(csvText);
+        if(currentUser) loadDashboardStats();
+    } catch(e) { 
+        console.log("Offline mode/Error", e);
+    }
+}
 
-        function parseCSVUser(text) {
-            const lines = text.trim().split('\n'), res = [];
-            for(let i=1; i<lines.length; i++) {
-                const r = lines[i].split(',').map(c => c.trim().replace(/"/g,''));
-                if(r.length >= 3) res.push({username:r[0], password:r[1], role:r[2], photo:r[3]||""});
-            }
-            return res;
+// --- PARSE CSV USER ---
+function parseCSVUser(text) {
+    const lines = text.trim().split('\n'), res = [];
+    for(let i=1; i<lines.length; i++) {
+        const r = lines[i].split(',').map(c => c.trim().replace(/"/g,''));
+        if(r.length >= 3) res.push({username:r[0], password:r[1], role:r[2], photo:r[3]||""});
+    }
+    return res;
+}
+
+// --- TOGGLE DARK MODE ---
+function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark');
+    const icon = document.getElementById('darkModeIcon');
+    const isDark = document.documentElement.classList.contains('dark');
+    if (icon) {
+        icon.classList.replace(isDark ? 'fa-moon':'fa-sun', isDark ? 'fa-sun' : 'fa-moon');
+    }
+    localStorage.setItem('theme', isDark?'dark':'light');
+}
+
+// --- TOGGLE SUBMENU HANYA SATU DEFINISI ---
+function toggleSubmenu(id, btn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const icon = btn.querySelector('.rotate-icon');
+    el.classList.toggle('open');
+    if(el.classList.contains('open')) {
+        el.style.maxHeight = el.scrollHeight + "px";
+        if (icon) icon.classList.add('rotate-180');
+    } else {
+        el.style.maxHeight = null;
+        if (icon) icon.classList.remove('rotate-180');
+    }
+}
+
+// --- LOGIN ---
+async function handleLogin(e) {
+    e.preventDefault();
+    const uInput = document.getElementById('username').value.trim();
+    const pInput = document.getElementById('password').value.trim();
+    const loader = document.getElementById('loginLoader');
+    const err = document.getElementById('loginError');
+
+    loader.classList.remove('hidden');
+    err.classList.add('hidden');
+
+    if(!dataReady && usersData.length === 0 && loadPromise) await loadPromise;
+
+    setTimeout(() => {
+        const user = usersData.find(
+            x => String(x.username).toLowerCase() === uInput.toLowerCase() && String(x.password) === pInput
+        );
+        if(user) {
+            currentUser = user;
+            localStorage.setItem('siakad_user', JSON.stringify(currentUser));
+            updateUIForUser();
+        } else {
+            err.innerText = "Username atau Password Salah!";
+            err.classList.remove('hidden');
         }
+        loader.classList.add('hidden');
+    }, 800);
+}
 
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            const icon = document.getElementById('darkModeIcon');
-            const isDark = document.documentElement.classList.contains('dark');
-            icon.classList.replace(isDark?'fa-moon':'fa-sun', isDark?'fa-sun':'fa-moon');
-            localStorage.setItem('theme', isDark?'dark':'light');
+function updateUIForUser() {
+    document.getElementById('loginSection').classList.add('hidden');
+    showPage('home');
+    if(document.getElementById('sidebarUsername')) document.getElementById('sidebarUsername').innerText = currentUser.username;
+    if(document.getElementById('sidebarRole')) document.getElementById('sidebarRole').innerText = currentUser.role;
+    if(document.getElementById('welcomeName')) document.getElementById('welcomeName').innerText = currentUser.username;
+    if(currentUser.photo && currentUser.photo.startsWith('http')) {
+        const avatar = document.getElementById('sidebarAvatar');
+        if (avatar) {
+            avatar.innerHTML = '';
+            avatar.style.backgroundImage = `url('${currentUser.photo}')`;
         }
+    }
+    generateMenu(currentUser.role);
+    loadDashboardStats();
+}
 
-        function toggleSubmenu(id, btn) {
-            const el = document.getElementById(id);
-            const icon = btn.querySelector('.rotate-icon');
-            el.classList.toggle('open');
-            if(el.style.maxHeight){ el.style.maxHeight = null; icon.classList.remove('rotate-180'); } 
-            else { el.style.maxHeight = el.scrollHeight + "px"; icon.classList.add('rotate-180'); }
+// --- SHOW PAGE (PERBAIKAN TUNGGAL) ---
+function showPage(p) {
+    const pages = ['pageHome', 'pageInput', 'pageRekap', 'pagePortal', 'pageAgenda', 'pageInputSurat', 'pageRiwayatSurat', 'pageDisiplin', 'pageMedis', 'pageMakan'];
+    pages.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('hidden'); 
+    });
+
+    const navButtons = document.querySelectorAll('nav button');
+    navButtons.forEach(btn => {
+        btn.classList.remove('bg-green-50', 'text-green-700', 'dark:bg-gray-800');
+        btn.classList.add('text-gray-600', 'dark:text-gray-400');
+        if(btn.firstElementChild) {
+            btn.firstElementChild.classList.remove('text-green-600');
         }
+    });
 
-        // --- AUTH ---
-        async function handleLogin(e) {
-            e.preventDefault();
-            const uInput = document.getElementById('username').value.trim();
-            const pInput = document.getElementById('password').value.trim();
-            const loader = document.getElementById('loginLoader');
-            const err = document.getElementById('loginError');
+    const activeNavId = 'nav' + p.charAt(0).toUpperCase() + p.slice(1);
+    const activeBtn = document.getElementById(activeNavId);
+    if(activeBtn) {
+        activeBtn.classList.add('bg-green-50', 'text-green-700', 'dark:bg-gray-800');
+        activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+    }
 
-            loader.classList.remove('hidden');
-            err.classList.add('hidden');
+    const activePageId = 'page' + p.charAt(0).toUpperCase() + p.slice(1);
+    const activePage = document.getElementById(activePageId);
+    if(activePage) activePage.classList.remove('hidden');
 
-            // Ensure data is loaded
-            if(!dataReady && usersData.length === 0) await loadPromise;
+    // Logika khusus untuk setiap page
+    if(p === 'rekap') loadRecapData(1);
+    if(p === 'riwayatSurat') loadSuratHistory();
+    if(p === 'agenda') setTimeout(loadCalendar, 200);
 
-            setTimeout(() => {
-                const user = usersData.find(x => String(x.username).toLowerCase() === uInput.toLowerCase() && String(x.password) === pInput);
-                if(user) {
-                    currentUser = user;
-                    localStorage.setItem('siakad_user', JSON.stringify(currentUser));
-                    updateUIForUser();
-                } else {
-                    err.innerText = "Username atau Password Salah!";
-                    err.classList.remove('hidden');
-                }
-                loader.classList.add('hidden');
-            }, 800);
-        }
+    // Auto-fill jabatan jika user login
+    if(currentUser) {
+        if(p === 'disiplin' && document.getElementById('disiplinBagian')) 
+            document.getElementById('disiplinBagian').value = currentUser.role;
+        if(p === 'inputSurat' && document.getElementById('suratJabatan')) 
+            document.getElementById('suratJabatan').value = currentUser.role;
+    }
 
-        function updateUIForUser() {
-            document.getElementById('loginSection').classList.add('hidden');
-            showPage('home');
-            document.getElementById('sidebarUsername').innerText = currentUser.username;
-            document.getElementById('sidebarRole').innerText = currentUser.role;
-            document.getElementById('welcomeName').innerText = currentUser.username;
-            if(currentUser.photo && currentUser.photo.startsWith('http')) {
-                document.getElementById('sidebarAvatar').innerHTML = '';
-                document.getElementById('sidebarAvatar').style.backgroundImage = `url('${currentUser.photo}')`;
-            }
-            generateMenu(currentUser.role);
-            loadDashboardStats();
-        }
+    // Judul header
+    const titleEl = document.getElementById('pageTitle');
+    if(titleEl) 
+        titleEl.innerText = p.replace(/([A-Z])/g, ' $1').toUpperCase();
 
-        function logout() { confirmLogout(); }
-        function performLogout() { localStorage.removeItem('siakad_user'); location.reload(); }
-        function openDrive() { 
-            if(currentUser.role === 'admin') {
-                const choice = prompt("Pilih Bagian (ketik nama):\nkeamanan, bahasa, peribadatan, kesenian, olahraga, kesehatan, logistik, dapur, kordinator");
-                if(choice && DRIVE_LINKS[choice.toLowerCase()]) window.open(DRIVE_LINKS[choice.toLowerCase()], '_blank');
-            } else {
-                const url = DRIVE_LINKS[currentUser.role.toLowerCase()];
-                if(url && url !== '#') window.open(url, '_blank'); else alert("Link belum ada.");
-            }
-        }
+    // Tutup sidebar otomatis di HP
+    if(window.innerWidth < 768) {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('sidebarOverlay');
+        if(sb) sb.classList.add('-translate-x-full');
+        if(ov) ov.classList.add('hidden');
+    }
+}
 
-        // MENU & INPUT
-        function generateMenu(role) {
-            const grid = document.getElementById('categoryGrid');
-            grid.innerHTML = '';
-            const menus = [
-                { id: 'harian', label: 'Kamar', icon: 'fa-bed', roles: ['admin', 'keamanan'], groupBy: 'kamar', color: 'bg-blue-50 text-blue-600' },
-                { id: 'muhadhoroh', label: 'Muhadhoroh', icon: 'fa-microphone', roles: ['admin', 'bahasa'], groupBy: 'kelas', color: 'bg-purple-50 text-purple-600' },
-                { id: 'halaqoh', label: 'Halaqoh', icon: 'fa-quran', roles: ['admin', 'peribadatan'], groupBy: 'kelas', color: 'bg-yellow-50 text-yellow-600' },
-                { id: 'pramuka', label: 'Pramuka', icon: 'fa-campground', roles: ['admin', 'kordinator'], groupBy: 'kelas', color: 'bg-orange-50 text-orange-600' },
-                { id: 'olahraga', label: 'Olahraga', icon: 'fa-futbol', roles: ['admin', 'olahraga'], groupBy: 'kelas', color: 'bg-green-50 text-green-600' },
-                { id: 'kesenian', label: 'Kesenian', icon: 'fa-paint-brush', roles: ['admin', 'kesenian'], groupBy: 'kelas', color: 'bg-pink-50 text-pink-600' }
-            ];
-            menus.forEach(m => {
-                if(m.roles.includes(role.toLowerCase())) {
-                    const btn = document.createElement('button');
-                    btn.className = "menu-card status-card flex flex-col items-center p-4 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-300 group";
-                    btn.onclick = (e) => setupInputForm(m, e.currentTarget);
-                    btn.innerHTML = `<div class="h-12 w-12 rounded-full ${m.color} dark:bg-opacity-20 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform"><i class="fas ${m.icon}"></i></div><span class="font-bold text-gray-700 dark:text-gray-300 text-sm">${m.label}</span>`;
-                    grid.appendChild(btn);
-                }
-            });
-        }
-
-        function setupInputForm(menu, btnElement) {
-            if(selectedCategoryButton) selectedCategoryButton.classList.remove('active');
-            if(btnElement) { btnElement.classList.add('active'); selectedCategoryButton = btnElement; }
-            document.getElementById('selectPrompt').classList.add('hidden');
-            document.getElementById('formContainer').classList.remove('hidden');
-            document.getElementById('activeCategoryBadge').innerText = menu.label;
-            document.getElementById('absensiType').value = menu.id;
-            document.getElementById('studentListContainer').classList.add('hidden');
-            const select = document.getElementById('groupSelect');
-            select.innerHTML = '<option value="">-- Pilih --</option>';
-            const labelMap = (menu.groupBy === 'kamar') ? {text:"Pilih Kamar", set: listKamar, idx:4} : {text:"Pilih Kelas", set: listKelas, idx:3};
-            const grpLabel = document.getElementById('groupLabel'); if(grpLabel) grpLabel.innerText = labelMap.text;
-            select.dataset.filterMode = labelMap.idx;
-            Array.from(labelMap.set).sort().forEach(item => {
-                const opt = document.createElement('option'); opt.value = item; opt.innerText = item; select.appendChild(opt);
-            });
-            document.getElementById('formContainer').scrollIntoView({behavior: 'smooth'});
-        }
-
-        function loadGroupStudents() {
-            const select = document.getElementById('groupSelect');
-            if (!select.value) { document.getElementById('studentListContainer').classList.add('hidden'); return; }
-            const filterIdx = parseInt(select.dataset.filterMode);
-            const filtered = studentsDataRaw.filter(row => row[filterIdx] == select.value);
-            const tbody = document.getElementById('studentTableBody');
-            tbody.innerHTML = '';
-            filtered.forEach((s, i) => {
-                const html = `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b dark:border-gray-700" data-id="${s[0]}" data-nama="${s[1]}">
-                    <td class="text-center p-4 text-gray-400 font-mono text-xs">${i+1}</td><td class="p-4"><div class="font-bold text-gray-800 dark:text-white">${s[1]}</div><div class="text-xs text-gray-400">${s[0]}</div></td>
-                    <td class="p-4"><div class="flex justify-center gap-2 status-card">
-                        <div class="relative"><input type="radio" name="status-${i}" id="s-${i}" value="Sakit" class="hidden peer"><label for="s-${i}" class="cursor-pointer w-8 h-8 rounded-lg border border-yellow-200 text-yellow-600 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:border-yellow-800 flex items-center justify-center font-bold text-xs">S</label></div>
-                        <div class="relative"><input type="radio" name="status-${i}" id="i-${i}" value="Izin" class="hidden peer"><label for="i-${i}" class="cursor-pointer w-8 h-8 rounded-lg border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:border-blue-800 flex items-center justify-center font-bold text-xs">I</label></div>
-                        <div class="relative"><input type="radio" name="status-${i}" id="a-${i}" value="Alpha" class="hidden peer"><label for="a-${i}" class="cursor-pointer w-8 h-8 rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:border-red-800 flex items-center justify-center font-bold text-xs">A</label></div>
-                        <button onclick="resetRow(${i})" class="ml-2 h-8 w-8 rounded-full text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"><i class="fas fa-undo text-xs"></i></button>
-                    </div></td></tr>`;
-                tbody.insertAdjacentHTML('beforeend', html);
-            });
-            const c = document.getElementById('studentListContainer');
-            c.classList.remove('hidden'); setTimeout(() => { c.style.opacity=1; }, 50);
-        }
-
-        window.resetRow = function(index) { document.getElementsByName(`status-${index}`).forEach(r => r.checked = false); };
-
-        async function submitBulkAttendance() {
-            const agenda = document.getElementById('agendaInput').value;
-            if(!agenda) return showModal('error', 'Agenda Kosong', 'Mohon isi keterangan kegiatan.');
-            const btn = document.getElementById('btnKirim');
-            const origText = btn.innerHTML;
-            btn.disabled = true; btn.innerHTML = 'Mengirim...';
-            const entries = [];
-            document.querySelectorAll('#studentTableBody tr').forEach(tr => {
-                const status = tr.querySelector('input[type="radio"]:checked')?.value;
-                if(status) entries.push({id: tr.dataset.id, nama: tr.dataset.nama, status: status});
-            });
-            if(entries.length===0) { btn.disabled=false; btn.innerHTML=origText; return showModal('success', 'Info', 'Semua Hadir.'); }
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({ action: 'input_absensi', tipe: document.getElementById('absensiType').value, agenda: agenda, pelapor: currentUser.username, entries: entries }) });
-                showModal('success', 'Berhasil', `${entries.length} data disimpan.`);
-                document.getElementById('groupSelect').value = '';
-                document.getElementById('studentListContainer').classList.add('hidden');
-                document.getElementById('agendaInput').value = '';
-                loadDashboardStats(); 
-            } catch(e) { showModal('error', 'Gagal', 'Koneksi Error'); }
-            finally { btn.disabled = false; btn.innerHTML = origText; }
-        }
-
-        // --- NEW FUNCTIONS ---
-        function searchForInput(id, context) {
-            if(!id) return;
-            const s = studentsDataRaw.find(r => r[0] == id);
-            const nameEl = document.getElementById(context+'Nama');
-            const infoEl = document.getElementById(context+'Info');
-            if(s) { nameEl.innerText = s[1]; infoEl.innerText = `${s[3]} / ${s[4]}`; } 
-            else { nameEl.innerText = "Tidak Ditemukan"; infoEl.innerText = "-"; }
-            if(context==='disiplin' || context==='medis') document.getElementById(context+'Bagian').value = currentUser.role;
-        }
-
-        function checkMealTime() {
-            const now=new Date(), m=now.getHours()*60+now.getMinutes();
-            let s="-", v=false;
-            if(m>=360 && m<=450) {s="Pagi"; v=true;} else if(m>=720 && m<=810) {s="Siang"; v=true;} else if(m>=990 && m<=1080) {s="Malam"; v=true;}
-            const l=document.getElementById('makanSesiInfo'), i=document.getElementById('makanId');
-            if(l) { l.innerText = v?`Sesi: ${s}`:"Diluar Jam"; l.className = v?"text-center text-green-600 font-bold mb-8":"text-center text-red-500 font-bold mb-8"; }
-            if(i) { i.disabled=!v; if(!v) i.placeholder="TUTUP"; else i.placeholder="SCAN ID"; }
-            return {valid:v, sesi:s};
-        }
-
-        async function submitMakan() {
-            const c = checkMealTime(); if(!c.valid) return alert("Tutup");
-            const id = document.getElementById('makanId').value;
-            const s = studentsDataRaw.find(r => r[0] == id);
-            if(!s) { alert("Unknown"); document.getElementById('makanId').value=''; return; }
-            document.getElementById('makanResult').classList.remove('hidden');
-            document.getElementById('makanNama').innerText = s[1];
-            document.getElementById('makanId').value = "";
-            await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body:JSON.stringify({action:'input_makan', id:s[0], nama:s[1], sesi:c.sesi, pelapor:currentUser.username}) });
-            setTimeout(()=>document.getElementById('makanResult').classList.add('hidden'),2000);
-        }
-
-        async function submitDisiplin() {
-            const id=document.getElementById('disiplinId').value, nama=document.getElementById('disiplinNama').innerText;
-            const info=document.getElementById('disiplinInfo').innerText;
-            if(nama==='-'||nama==='Tidak Ditemukan') return alert("Cari ID dulu");
-            const [kls, kmr] = info.split(' / ');
-            await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:JSON.stringify({
-                action:'input_disiplin', id:id, nama:nama, kelas:kls, kamar:kmr,
-                jenis:document.getElementById('disiplinJenis').value, hukuman:document.getElementById('disiplinHukuman').value, pelapor:currentUser.username
-            })});
-            alert("Tersimpan");
-            ['disiplinId','disiplinJenis','disiplinHukuman'].forEach(i=>document.getElementById(i).value='');
-        }
-
-        async function submitMedis() {
-            const id=document.getElementById('medisId').value, nama=document.getElementById('medisNama').innerText;
-            const info=document.getElementById('medisInfo').innerText;
-            if(nama==='-') return alert("ID?");
-            const [kls, kmr] = info.split(' / ');
-            await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:JSON.stringify({
-                action:'input_medis', id:id, nama:nama, kelas:kls, kamar:kmr,
-                keterangan:document.getElementById('medisKet').value, pelapor:currentUser.username
-            })});
-            alert("Tersimpan");
-            document.getElementById('medisId').value=''; document.getElementById('medisKet').value='';
-        }
-
-        // SURAT LOGIC
-        async function submitSurat() {
-            const btn = document.getElementById('btnKirimSurat');
-            btn.innerHTML = "Menyimpan..."; btn.disabled = true;
-            const payload = {
-                action: 'input_surat',
-                kategori: document.querySelector('input[name="suratKategori"]:checked').value,
-                kode: document.getElementById('suratKode').value,
-                jabatan: document.getElementById('suratJabatan').value,
-                jenis: document.getElementById('suratJenis').value,
-                tujuan: document.getElementById('suratTujuan').value,
-                status: document.getElementById('suratStatus').value,
-                link: document.getElementById('suratLink').value
-            };
-            try {
-                await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body:JSON.stringify(payload) });
-                showModal('success', 'Tersimpan', 'Data surat berhasil disimpan.');
-                ['suratKode','suratJenis','suratTujuan','suratLink'].forEach(id=>document.getElementById(id).value='');
-            } catch(e) { showModal('error', 'Gagal', 'Koneksi error'); }
-            finally { btn.innerHTML = "Simpan Surat"; btn.disabled = false; }
-        }
-
-        async function loadSuratHistory() {
-            const tbody = document.getElementById('suratTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center">Memuat...</td></tr>';
-            try {
-                const res = await fetch(SCRIPT_URL + '?action=getSurat');
-                const json = await res.json();
-                if(json.result === 'success') {
-                    suratData = json.data.reverse();
-                    renderSuratTable(suratData);
-                    renderSuratChart(suratData);
-                    document.getElementById('statSurat').innerText = suratData.length; 
-                }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="6">Error</td></tr>'; }
-        }
-
-        function filterSurat(type) {
-            if(type === 'all') renderSuratTable(suratData);
-            else renderSuratTable(suratData.filter(r => r[1] === type));
-        }
-
-        function renderSuratTable(data) {
-            const tbody = document.getElementById('suratTableBody');
-            tbody.innerHTML = data.map(r => `
-                <tr class="border-b dark:border-gray-700 text-xs">
-                    <td class="p-3">${r[0].split(' ')[0]}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded ${r[1]=='Masuk'?'bg-green-100 text-green-700':'bg-blue-100 text-blue-700'} font-bold">${r[1]}</span></td>
-                    <td class="p-3 font-mono">${r[2]}</td><td class="p-3">${r[4]}</td><td class="p-3">${r[6]}</td>
-                    <td class="p-3"><a href="${r[7]}" target="_blank" class="text-blue-500 hover:underline"><i class="fas fa-link"></i></a></td>
-                </tr>`).join('');
-        }
-
-        function renderSuratChart(data) {
-            const ctx = document.getElementById('suratChart').getContext('2d');
-            const masuk = data.filter(r => r[1] === 'Masuk').length;
-            const keluar = data.filter(r => r[1] === 'Keluar').length;
-            new Chart(ctx, { type: 'doughnut', data: { labels: ['Masuk', 'Keluar'], datasets: [{ data: [masuk, keluar], backgroundColor: ['#16a34a', '#2563eb'] }] }, options: { responsive: true, maintainAspectRatio: false } });
-        }
-
-        function openPublicPortal() { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('publicPortal').classList.remove('hidden'); }
-        function closePublicPortal() { document.getElementById('publicPortal').classList.add('hidden'); document.getElementById('loginSection').classList.remove('hidden'); }
-
-        async function searchStudentHistory(context) {
-            if(!dataReady && loadPromise) try { await loadPromise; } catch(e){}
-            const idInput = context === 'public' ? 'publicSearchId' : 'internalSearchId';
-            const id = document.getElementById(idInput).value;
-            if(!id) return alert("Masukkan ID");
-
-            const resDiv = document.getElementById(context==='public'?'publicResult':'internalResult');
-            const nameEl = document.getElementById(context==='public'?'publicName':'internalName');
-            const bodyEl = document.getElementById(context==='public'?'publicHistoryBody':'internalHistoryBody');
-            const classEl = document.getElementById(context === 'public' ? 'publicClass' : 'internalClass');
-            const roomEl = document.getElementById(context === 'public' ? 'publicRoom' : 'internalRoom');
-            
-            const s = studentsDataRaw.find(row => row[0] == id);
-            document.getElementById(resDiv).classList.remove('hidden');
-            if(s) { document.getElementById(nameEl).innerText = s[1]; if(classEl) classEl.innerText = s[3]||'-'; if(roomEl) roomEl.innerText = s[4]||'-'; }
-            else { document.getElementById(nameEl).innerText = "ID: " + id + " (Tidak Ditemukan)"; }
-
-            bodyEl.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-400 animate-pulse">Sedang memuat data...</td></tr>';
-            try {
-                const res = await fetch(`${SCRIPT_URL}?action=getStudentHistory&id=${id}`);
-                const json = await res.json();
-                if(json.result === 'success' && json.data.length > 0) {
-                    bodyEl.innerHTML = json.data.slice(0,10).map(r => {
-                        const color = r[2]==='Sakit'?'text-yellow-600 bg-yellow-50': r[2]==='Izin'?'text-blue-600 bg-blue-50': r[2]==='Alpha'?'text-red-600 bg-red-50':'text-green-600 bg-green-50';
-                        let tgl = r[0]; try { tgl = new Date(r[0]).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}); } catch(e){}
-                        return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"><td class="p-3 text-xs font-mono text-gray-500 dark:text-gray-400">${tgl}</td><td class="p-3"><div class="font-bold text-xs uppercase text-gray-400 mb-0.5">${r[3]}</div><div class="text-sm dark:text-gray-200">${r[4]}</div></td><td class="p-3 text-center"><span class="px-2 py-1 rounded-lg text-xs font-bold ${color}">${r[2]}</span></td></tr>`;
-                    }).join('');
-                } else { bodyEl.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-gray-400">Belum ada riwayat.</td></tr>'; }
-            } catch(e) { bodyEl.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">Error</td></tr>'; }
-        }
-
-        // --- RECAP & STATS ---
-        async function loadRecapData(page) {
-            const type = document.getElementById('rekapSourceSelect').value;
-            const loader = document.getElementById('rekapLoader');
-            const table = document.querySelector('#rekapTableBody').parentNode;
-            if(page===1) {
-                loader.classList.remove('hidden'); table.classList.add('opacity-50');
-                try {
-                    const res = await fetch(`${SCRIPT_URL}?action=getRecap&tipe=${type}`);
-                    const json = await res.json();
-                    if(json.result === 'success') {
-                        fullRecapData = json.data.reverse(); currentPage = 1; renderTable();
-                        calculateTopStats(fullRecapData); updateChart(fullRecapData);
-                    }
-                } catch(e){}
-                loader.classList.add('hidden'); table.classList.remove('opacity-50');
-            } else { currentPage = page; renderTable(); }
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('rekapTableBody');
-            const start = (currentPage-1)*rowsPerPage;
-            const data = fullRecapData.slice(start, start+rowsPerPage);
-            tbody.innerHTML = data.map((r, i) => {
-                const color = r[4]==='Sakit'?'text-yellow-600 bg-yellow-50': r[4]==='Izin'?'text-blue-600 bg-blue-50': r[4]==='Alpha'?'text-red-600 bg-red-50':'text-green-600 bg-green-50';
-                let t = r[0]; try { t = new Date(r[0]).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); } catch(x){}
-                return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td class="px-6 py-4 text-gray-400 text-xs">${start+i+1}</td><td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">${t}</td><td class="px-6 py-4 font-bold dark:text-gray-200">${r[2]}</td><td class="px-6 py-4 text-xs truncate max-w-xs">${r[3]}</td><td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-full text-xs font-bold ${color}">${r[4]}</span></td><td class="px-6 py-4 text-xs text-gray-400">${r[5]}</td></tr>`;
-            }).join('');
-            document.getElementById('pageInfo').innerText = `Halaman ${currentPage}`;
-            document.getElementById('btnPrev').disabled = currentPage === 1;
-            document.getElementById('btnNext').disabled = (start + rowsPerPage) >= fullRecapData.length;
-        }
-
-        function changePage(d) { if(currentPage+d>0) { currentPage += d; renderTable(); } }
-
-        function calculateTopStats(data) {
-            const stats = {};
-            data.forEach(r => { const n=r[2], s=r[4]; if(!stats[n]) stats[n]={S:0,I:0,A:0}; if(s==='Sakit') stats[n].S++; else if(s==='Izin') stats[n].I++; else if(s==='Alpha') stats[n].A++; });
-            const findMax = (key, label, icon, color) => {
-                let maxVal=0, person='-'; for(const n in stats) { if(stats[n][key]>maxVal) { maxVal=stats[n][key]; person=n; } }
-                return `<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border dark:border-gray-700 flex items-center gap-4"><div class="h-12 w-12 rounded-xl ${color} flex items-center justify-center text-xl"><i class="fas ${icon}"></i></div><div class="flex-1 min-w-0"><p class="text-xs text-gray-400 uppercase font-bold">${label} Terbanyak</p><h4 class="font-bold truncate dark:text-gray-100">${person}</h4><p class="text-sm dark:text-gray-400"><span class="font-bold text-lg">${maxVal}</span> kali</p></div></div>`;
-            };
-            document.getElementById('topStatsContainer').innerHTML = findMax('S','Sakit','bed-pulse','bg-yellow-50 text-yellow-600') + findMax('I','Izin','envelope-open-text','bg-blue-50 text-blue-600') + findMax('A','Alpha','times-circle','bg-red-50 text-red-600');
-        }
-
-        async function loadDashboardStats() {
-            try { const res = await fetch(`${SCRIPT_URL}?action=getRecap&tipe=harian`); const json = await res.json(); if(json.result==='success') { const d = json.data.reverse(); calculateTopStats(d); updateChart(d); } } catch(e){}
-        }
-
-        function updateChart(rows) {
-            const d=new Date(), day=d.getDay(), diff=d.getDate()-day+(day==0?-6:1); const monday=new Date(d.setDate(diff));
-            const labels=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu']; const dataMap={}, keys=[];
-            for(let i=0;i<7;i++) { let t=new Date(monday); t.setDate(monday.getDate()+i); let k=t.toISOString().split('T')[0]; keys.push(k); dataMap[k]={S:0,I:0,A:0}; }
-            rows.forEach(r => { let k=r[6]?r[6].substring(0,10):''; if(dataMap[k]) { const s=r[4]; if(s==='Sakit') dataMap[k].S++; else if(s==='Izin') dataMap[k].I++; else if(s==='Alpha') dataMap[k].A++; } });
-            if(chartInstance) chartInstance.destroy();
-            const ctx = document.getElementById('attendanceChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: labels, datasets: [{label:'Sakit',data:keys.map(k=>dataMap[k].S),borderColor:'#eab308',fill:false},{label:'Izin',data:keys.map(k=>dataMap[k].I),borderColor:'#3b82f6',fill:false},{label:'Alpha',data:keys.map(k=>dataMap[k].A),borderColor:'#dc2626',fill:false}] },
-                options: { responsive: true, maintainAspectRatio: false, scales:{y:{beginAtZero:true}}, plugins:{legend:{position:'bottom'}} }
-            });
-        }
-// --- FUNGSI NAVIGASI HALAMAN (PENTING) ---
-        function showPage(p) {
-            // 1. Daftar semua ID Halaman
-            const pages = ['pageHome', 'pageInput', 'pageRekap', 'pagePortal', 'pageAgenda', 'pageInputSurat', 'pageRiwayatSurat', 'pageDisiplin', 'pageMedis', 'pageMakan'];
-            
-            // 2. Sembunyikan semua halaman (Safety check: pastikan elemen ada)
-            pages.forEach(id => { 
-                const el = document.getElementById(id);
-                if(el) el.classList.add('hidden'); 
-            });
-            
-            // 3. Reset warna tombol menu sidebar
-            const navButtons = document.querySelectorAll('nav button');
-            navButtons.forEach(btn => {
-                btn.classList.remove('bg-green-50', 'text-green-700', 'dark:bg-gray-800');
-                btn.classList.add('text-gray-600', 'dark:text-gray-400');
-                // Reset ikon di dalamnya jika ada
-                if(btn.firstElementChild) {
-                     btn.firstElementChild.classList.remove('text-green-600');
-                }
-            });
-
-            // 4. Highlight tombol menu yang aktif
-            // Buat ID Navigasi otomatis: home -> navHome, input -> navInput
-            const activeNavId = 'nav' + p.charAt(0).toUpperCase() + p.slice(1);
-            const activeBtn = document.getElementById(activeNavId);
-            if(activeBtn) {
-                activeBtn.classList.add('bg-green-50', 'text-green-700', 'dark:bg-gray-800');
-                activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
-            }
-
-            // 5. Tampilkan halaman yang dipilih
-            const activePageId = 'page' + p.charAt(0).toUpperCase() + p.slice(1);
-            const activePage = document.getElementById(activePageId);
-            if(activePage) activePage.classList.remove('hidden');
-
-            // 6. Logika khusus per halaman (Load Data)
-            if(p === 'rekap') loadRecapData(1);
-            if(p === 'riwayatSurat') loadSuratHistory();
-            if(p === 'agenda') setTimeout(loadCalendar, 200);
-            
-            // Auto-fill jabatan pelapor jika user sudah login
-            if(currentUser) {
-                if(p === 'disiplin' && document.getElementById('disiplinBagian')) document.getElementById('disiplinBagian').value = currentUser.role;
-                if(p === 'inputSurat' && document.getElementById('suratJabatan')) document.getElementById('suratJabatan').value = currentUser.role;
-            }
-
-            // 7. Update Judul Header
-            const titleEl = document.getElementById('pageTitle');
-            if(titleEl) titleEl.innerText = p.replace(/([A-Z])/g, ' $1').toUpperCase(); // Spasi sebelum huruf besar
-
-            // 8. Tutup sidebar otomatis di HP
-            if(window.innerWidth < 768) {
-                const sb = document.getElementById('sidebar');
-                const ov = document.getElementById('sidebarOverlay');
-                if(sb) sb.classList.add('-translate-x-full');
-                if(ov) ov.classList.add('hidden');
-            }
-        }
+// Perbaiki hanya deklarasi 1 kali untuk fungsi/fungsi lain yang sering error!
         
         function toggleSubmenu(id, btn) { document.getElementById(id).classList.toggle('hidden'); }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
