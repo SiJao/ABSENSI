@@ -1,0 +1,14 @@
+{
+  "name": "hisada-system",
+  "version": "1.0.0",
+  "description": "Sistem Administrasi Daarul Uluum Lido",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'No build needed for static site'",
+    "start": "npx serve ."
+  },
+  "keywords": ["administration", "school", "attendance"],
+  "author": "",
+  "license": "MIT"
+}
