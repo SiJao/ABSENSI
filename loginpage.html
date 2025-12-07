@@ -1,1 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Administrasi Daarul 'Uluum Lido</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Soft Green Background */
+        }
+        /* Animasi halus untuk loading */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #16a34a;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center px-4">
 
+    <!-- Container Utama -->
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border border-green-50">
+        
+        <!-- Header / Logo Area -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-700">
+                <!-- Icon Masjid Sederhana (SVG) -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-semibold text-gray-800">Daarul 'Uluum Lido</h1>
+            <p class="text-sm text-gray-500 mt-1">Sistem Administrasi Terpadu</p>
+        </div>
+
+        <!-- Form Login -->
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" id="username" name="username" required 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition duration-200 placeholder-gray-400"
+                    placeholder="Masukkan username Anda">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="password" name="password" required 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition duration-200 placeholder-gray-400"
+                    placeholder="Masukkan password Anda">
+            </div>
+
+            <!-- Pesan Error/Sukses -->
+            <div id="statusMessage" class="text-sm text-center min-h-[20px]"></div>
+
+            <button type="submit" id="loginBtn" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded-lg transition duration-200 flex items-center justify-center shadow-md hover:shadow-lg transform active:scale-95">
+                <span id="btnText">Masuk</span>
+                <div id="btnLoader" class="loader ml-2 hidden"></div>
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-xs text-gray-400">
+            &copy; 2024 Daarul 'Uluum Lido IT Dev
+        </div>
+    </div>
+
+    <!-- Script Logika -->
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAIpCKM-FLkgVPuNA9kEQWlUd_JTi-M1_43FC4mdV65-u83LWPMYkrtwtWBpDGB5Tds3ew9Yeq0H_W/pub?output=csv';
+
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const statusMessage = document.getElementById('statusMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Mencegah reload halaman
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if(!username || !password) {
+                showStatus('Mohon lengkapi data login.', 'text-red-500');
+                return;
+            }
+
+            // UI Loading State
+            setLoading(true);
+            showStatus('', '');
+
+            try {
+                // Fetch data dari Google Sheet CSV
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error("Gagal mengambil data server.");
+                
+                const csvText = await response.text();
+                const users = parseCSV(csvText);
+
+                // Cari user yang cocok
+                const foundUser = users.find(u => 
+                    u.username === username && u.password === password
+                );
+
+                if (foundUser) {
+                    showStatus(`Login Berhasil! Selamat datang, ${foundUser.role}`, 'text-green-600');
+                    // Simulasi redirect atau masuk ke dashboard
+                    setTimeout(() => {
+                         // Simpan sesi (sementara di console/memory untuk demo)
+                         console.log("User Logged In:", foundUser);
+                         alert(`Masuk sebagai: ${foundUser.role}\n(Langkah selanjutnya kita akan buat Dashboard)`);
+                         // Di tahap selanjutnya, kita akan redirect: window.location.href = 'dashboard.html';
+                         setLoading(false);
+                    }, 1000);
+                } else {
+                    showStatus('Username atau Password salah.', 'text-red-500');
+                    setLoading(false);
+                }
+
+            } catch (error) {
+                console.error(error);
+                showStatus('Terjadi kesalahan koneksi database.', 'text-red-500');
+                setLoading(false);
+            }
+        });
+
+        // Fungsi Helper: Parse CSV sederhana
+        // Asumsi struktur CSV: Username, Password, Role (Urutan kolom 1, 2, 3)
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            
+            // Mulai dari i=1 jika baris pertama adalah header, jika tidak mulai dari 0.
+            // Biasanya Google Sheets pub csv menyertakan header.
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // Split berdasarkan koma (Hati-hati jika data mengandung koma, 
+                // tapi untuk username/password sederhana ini cukup aman)
+                const cols = line.split(',');
+
+                // Bersihkan spasi/tanda kutip jika ada
+                const cleanCols = cols.map(c => c.replace(/^"|"$/g, '').trim());
+                
+                if (cleanCols.length >= 2) {
+                    result.push({
+                        username: cleanCols[0], // Kolom A
+                        password: cleanCols[1], // Kolom B
+                        role: cleanCols[2] || 'User' // Kolom C (Role)
+                    });
+                }
+            }
+            return result;
+        }
+
+        function showStatus(msg, colorClass) {
+            statusMessage.className = `text-sm text-center min-h-[20px] font-medium ${colorClass}`;
+            statusMessage.textContent = msg;
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loginBtn.disabled = true;
+                loginBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                btnText.textContent = 'Memproses...';
+                btnLoader.classList.remove('hidden');
+            } else {
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                btnText.textContent = 'Masuk';
+                btnLoader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
