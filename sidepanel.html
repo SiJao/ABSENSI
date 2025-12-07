@@ -1,1 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Pesantren</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Transisi halus untuk submenu */
+        .submenu {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .submenu.open {
+            max-height: 500px; /* Nilai arbitrer yang cukup besar */
+            opacity: 1;
+        }
+        /* Rotasi panah chevron */
+        .chevron {
+            transition: transform 0.3s;
+        }
+        .rotate-90 {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 flex h-screen overflow-hidden">
 
+    <!-- OVERLAY MOBILE (Hitam Transparan) -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 z-20 bg-black opacity-50 transition-opacity lg:hidden hidden"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 shadow-xl flex flex-col">
+        
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between h-16 px-6 bg-slate-950 border-b border-slate-800 shrink-0">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-mosque text-green-500 text-xl"></i>
+                <span class="text-lg font-bold text-white tracking-wide">SIM PONTREN</span>
+            </div>
+            <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Menu (Scrollable) -->
+        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1 custom-scrollbar">
+            
+            <!-- 1. DASHBOARD -->
+            <a href="#" class="flex items-center px-3 py-2.5 bg-green-600 text-white rounded-lg transition-colors group shadow-sm">
+                <i class="fas fa-th-large w-6 text-center"></i>
+                <span class="ml-3 font-medium">Dashboard</span>
+            </a>
+
+            <!-- 2. KALENDER -->
+            <a href="#" class="flex items-center px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group">
+                <i class="fas fa-calendar-alt w-6 text-center group-hover:text-green-400"></i>
+                <span class="ml-3 font-medium">Kalender</span>
+            </a>
+
+            <!-- 3. ABSENSI (Collapse) -->
+            <div>
+                <button onclick="toggleSubmenu('menu-absensi', this)" class="w-full flex items-center justify-between px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group focus:outline-none">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-clock w-6 text-center group-hover:text-green-400"></i>
+                        <span class="ml-3 font-medium">Absensi</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs chevron transition-transform text-slate-500"></i>
+                </button>
+                <!-- Submenu Items -->
+                <div id="menu-absensi" class="submenu pl-10 space-y-1">
+                    <a href="#" class="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors border-l border-slate-700 hover:border-green-500">
+                        Input Absensi
+                    </a>
+                    <a href="#" class="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors border-l border-slate-700 hover:border-green-500">
+                        Rekapitulasi
+                    </a>
+                </div>
+            </div>
+
+            <!-- 4. KORESPONDENSI (Collapse) -->
+            <div>
+                <button onclick="toggleSubmenu('menu-surat', this)" class="w-full flex items-center justify-between px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group focus:outline-none">
+                    <div class="flex items-center">
+                        <i class="fas fa-envelope-open-text w-6 text-center group-hover:text-green-400"></i>
+                        <span class="ml-3 font-medium">Korespodensi</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs chevron transition-transform text-slate-500"></i>
+                </button>
+                <div id="menu-surat" class="submenu pl-10 space-y-1">
+                    <a href="#" class="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors border-l border-slate-700 hover:border-green-500">
+                        Sirkulasi Surat
+                    </a>
+                    <a href="#" class="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors border-l border-slate-700 hover:border-green-500">
+                        Rekapitulasi Surat
+                    </a>
+                </div>
+            </div>
+
+            <!-- 5. PELAYANAN SANTRI (Collapse) -->
+            <div>
+                <button onclick="toggleSubmenu('menu-santri', this)" class="w-full flex items-center justify-between px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group focus:outline-none">
+                    <div class="flex items-center">
+                        <i class="fas fa-hands-holding-child w-6 text-center group-hover:text-green-400"></i>
+                        <span class="ml-3 font-medium">Pelayanan Santri</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs chevron transition-transform text-slate-500"></i>
+                </button>
+                <div id="menu-santri" class="submenu pl-10 space-y-1">
+                    <a href="#" class="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors border-l border-slate-700 hover:border-green-500">
+                        Disiplin Santri
+                    </a>
+                    <a href="#" class="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors border-l border-slate-700 hover:border-green-500">
+                        Dapur & Logistik
+                    </a>
+                    <a href="#" class="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors border-l border-slate-700 hover:border-green-500">
+                        Poskestren (Kesehatan)
+                    </a>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Sidebar Footer / User Profile -->
+        <div class="p-4 border-t border-slate-800 bg-slate-950">
+            <div class="flex items-center gap-3">
+                <img src="https://ui-avatars.com/api/?name=Admin+Pesantren&background=16a34a&color=fff" alt="User" class="w-9 h-9 rounded-full">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Ust. Abdullah</p>
+                    <p class="text-xs text-slate-500 truncate">Administrator</p>
+                </div>
+                <button class="text-slate-400 hover:text-red-400 transition-colors">
+                    <i class="fas fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 flex flex-col min-h-screen">
+        
+        <!-- Header Mobile -->
+        <header class="bg-white shadow-sm h-16 flex items-center px-4 lg:hidden justify-between">
+            <span class="font-bold text-gray-700">Dashboard</span>
+            <button onclick="toggleSidebar()" class="text-gray-600 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </header>
+
+        <!-- Area Konten -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            
+            <!-- Breadcrumb Dummy -->
+            <div class="mb-6 flex items-center text-sm text-gray-500">
+                <span class="hover:text-green-600 cursor-pointer">Home</span>
+                <i class="fas fa-chevron-right text-xs mx-2"></i>
+                <span class="text-gray-800 font-semibold">Dashboard Ringkasan</span>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-4">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Santri</p>
+                        <h3 class="text-2xl font-bold text-gray-800">1,250</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Surat Masuk (Bulan Ini)</p>
+                        <h3 class="text-2xl font-bold text-gray-800">45</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-4">
+                        <i class="fas fa-user-injured text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Kunjungan Poskestren</p>
+                        <h3 class="text-2xl font-bold text-gray-800">12</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+                <img src="https://illustrations.popsy.co/amber/working-vacation.svg" alt="Empty" class="w-64 h-64 mx-auto mb-4 opacity-75">
+                <h2 class="text-xl font-semibold text-gray-700">Selamat Datang di Sistem Manajemen Pesantren</h2>
+                <p class="mt-2">Silakan pilih menu di samping untuk mengelola data Absensi, Surat, atau Pelayanan Santri.</p>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- 1. Logika Sidebar Responsive (Sama seperti sebelumnya) ---
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Tutup sidebar saat klik overlay
+        overlay.addEventListener('click', toggleSidebar);
+
+        // --- 2. Logika Collapse Menu (Dropdown) ---
+        function toggleSubmenu(submenuId, buttonElement) {
+            const submenu = document.getElementById(submenuId);
+            const icon = buttonElement.querySelector('.chevron');
+            
+            // Toggle visibility class
+            if (submenu.classList.contains('open')) {
+                submenu.classList.remove('open');
+                icon.classList.remove('rotate-90');
+            } else {
+                // Opsional: Tutup submenu lain saat satu dibuka (Accordion effect)
+                // closeAllSubmenus(); 
+                
+                submenu.classList.add('open');
+                icon.classList.add('rotate-90');
+            }
+        }
+
+        // Helper: Jika ingin mode accordion (hanya 1 menu terbuka dlm satu waktu)
+        // function closeAllSubmenus() {
+        //     document.querySelectorAll('.submenu').forEach(el => el.classList.remove('open'));
+        //     document.querySelectorAll('.chevron').forEach(el => el.classList.remove('rotate-90'));
+        // }
+    </script>
+</body>
+</html>
